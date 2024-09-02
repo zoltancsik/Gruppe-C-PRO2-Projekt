@@ -11,6 +11,8 @@ from clemgame import get_logger
 from games.tutorial_first_last.players import Speaker
 from games.tutorial_first_last.instancegenerator import GAME_NAME
 
+logger = get_logger(__name__)
+
 
 class FirstLast(GameMaster):
     """Implement mechanisms for playing FirstLast."""
