@@ -1,0 +1,1 @@
+Let's play a game. You must come up with a word.The word must be phonetically similar with previous_word.The word must be semantically different from previous_word.Your utterance must look like: 'your_word is similar to word_before'give your answer. If you break the rules, you lose.
