@@ -1,22 +1,19 @@
-from pathlib import Path
-
-path = Path('resources') / 'initial_prompts'
-
-with open(path / 'initial_prompt_a.template', 'w') as file:
+with open('resources/initial_prompts/initial_prompt_a.template', 'w') as file:
     file.write(
-        "You are playing the SoundAlike Game."
-        "You must come up with a word that is phonetically similar to $word"
-        "Your utterance must look like: your_word is similar to $word"
-        "give your answer. If you break the rules, you lose."
+        "You are playing the SoundAlike Game. "
+        "You must come up with phonetically similar word to $t_word. "
+        "Your utterance must look like: 'your guess is similar to $t_word. "
+        "Your partner will have to answer with a new word with the same rules "
+        "Give your answer. If you break the rules, you lose. "
+        "You will play for $nturns turns."
     )
 
-with open(path / 'initial_prompt_b.template', 'w') as file:
+with open('resources/initial_prompts/initial_prompt_b.template', 'w') as file:
     file.write(
-        "You are playing the SoundAlike Game."
-        "You must come up with a word that is phonetically similar to $word"
-        "Your utterance must look like: your_word is similar to $word"
-        "give your answer. If you break the rules, you lose."
+        "You are playing the SoundAlike Game. "
+        "You must come up with phonetically similar word to $t_word. "
+        "Your utterance must look like: 'your guess is similar to $t_word. "
+        "Your partner will have to answer with a new word with the same rules "
+        "Give your answer. If you break the rules, you lose. "
+        "You will play for $nturns turns."
     )
-
-# FIXME: Come up with more accurate prompts,
-# FIXME: but that depends on some other factors

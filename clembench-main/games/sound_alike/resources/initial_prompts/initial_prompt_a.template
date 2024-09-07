@@ -1,1 +1,1 @@
-You are playing the SoundAlike Game.You must come up with a word about $topic.Your utterance must look like: Topic: your_word give your answer. If you break the rules, you lose.
+You are playing the SoundAlike Game. You must come up with phonetically similar word to $t_word. Your utterance must look like: your_word is similar to $t_word. Give your answer. If you break the rules, you lose.You will play for $nturns turns.
