@@ -17,3 +17,6 @@ with open(path / 'initial_prompt_b.template', 'w') as file:
         "Your utterance must look like: your_word is similar to $word"
         "give your answer. If you break the rules, you lose."
     )
+
+# FIXME: Come up with more accurate prompts,
+# FIXME: but that depends on some other factors
