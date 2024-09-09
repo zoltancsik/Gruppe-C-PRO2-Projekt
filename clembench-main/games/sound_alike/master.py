@@ -16,6 +16,11 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.model_a = players[0]
         self.model_b = players[1]
 
+        # Attributes for Evaluation
+        self.aborted: bool = False
+        self.lose: bool = False
+        self.complete_turns: int = 0
+
     def setup(self, prompt_player_a, prompt_player_b, n_turns, game_id):
         # Setting up Players and Prompts
         self.player_a = Guesser(self.model_a, 'Player A')
@@ -56,10 +61,11 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.log_event(from_='GM', to='Player 2', action=action)
 
     def play(self) -> None:
-        while self.proceed():
-            self.current_turn += 1
+        while self.continue_round():
+            # Main Loop
+            self.complete_turns += 1
+            print(f"Complete Turns: {self.complete_turns}")
             self.log_next_turn()
-            self.turn()
 
         if self.complete_turns == self.n_turns:
             # End of the Game
@@ -69,6 +75,12 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         action = {'type': 'info', 'content': 'end game'}
         self.log_event(from_='GM', to='GM', action=action)
         # self.log_eval_assets()
+
+    def continue_round(self):
+        if self.complete_turns < self.n_turns:
+            return True
+        else:
+            return False
 
     def _pick_first_word(self):
         word_pool = self.load_file("resources/word_pool", ".txt")
