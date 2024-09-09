@@ -55,6 +55,21 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         action = {'type': 'send message', 'content': prompt_player_b}
         self.log_event(from_='GM', to='Player 2', action=action)
 
+    def play(self) -> None:
+        while self.proceed():
+            self.current_turn += 1
+            self.log_next_turn()
+            self.turn()
+
+        if self.complete_turns == self.n_turns:
+            # End of the Game
+            action = {'type': 'info', 'content': 'game successful'}
+            self.log_event(from_='GM', to='GM', action=action)
+
+        action = {'type': 'info', 'content': 'end game'}
+        self.log_event(from_='GM', to='GM', action=action)
+        # self.log_eval_assets()
+
     def _pick_first_word(self):
         word_pool = self.load_file("resources/word_pool", ".txt")
         return word_pool
