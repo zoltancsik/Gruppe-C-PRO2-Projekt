@@ -21,6 +21,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.lose: bool = False
         self.complete_turns: int = 0
 
+    """ MAIN METHODS """
     def setup(self, current_word: str, n_turns: int, prompt_player_a: str,
               prompt_player_b: str) -> None:
 
@@ -76,21 +77,55 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.log_event(from_='GM', to='GM', action=action)
         self.log_eval_assets()
 
+    def turn(self) -> None:
+        answer_a = self._process_parse_answer('a')
+        valid_turn = self._check_move_rule(answer_a)
+        if not valid_turn:
+            return None
+
+        # Logging
+        self._answer_to_history(answer_a, 'b', 'user')
+        action = {'type': 'send message', 'content': answer_a}
+        self.log_event(from_='GM', to='Player 2', action=action)
+
+        answer_b = self._process_parse_answer('b')
+        valid_turn = self._check_move_rule(answer_b)
+        if not valid_turn:
+            return None
+
+        # Logging
+        self._answer_to_history(answer_b, 'a', 'user')
+        action = {'type': 'send message', 'content': answer_b}
+        self.log_event(from_='GM', to='Player 1', action=action)
+
+        self.save_word()
+        self.complete_turns += 1
+
+    """ UTIL METHODS """
     def should_continue(self) -> None:
         return (self.current_turn < self.n_turns
                 and not self.aborted
                 and not self.lose)
 
-    def process_answer(self):
+    def _process_parse_answer(self):
         pass
 
-    def is_correct_answer(self):
+    def _answer_to_history(self):
         pass
 
-
-class SoundAlikeGameScorer(GameScorer):
-    def __init__():
+    def _check_move_rule(self):
         pass
+
+    def _check_game_rule(self):
+        pass
+
+    def _save_word(self):
+        pass
+
+    """ LOGGING """
+    def log_eval_assets(self) -> None:
+        self.log_key('Played turns', self.current_turn)
+        self.log_key('Complete turns', self.complete_turns)
 
 
 class SoundAlikeGameBenchmark(GameBenchmark):
@@ -110,3 +145,8 @@ class SoundAlikeGameBenchmark(GameBenchmark):
                            player_backends: List[str]
                            ) -> GameMaster:
         return SoundAlikeGameMaster(experiment, player_backends)
+
+
+class SoundAlikeGameScorer(GameScorer):
+    def __init__():
+        pass
