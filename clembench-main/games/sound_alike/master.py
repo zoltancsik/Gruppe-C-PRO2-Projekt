@@ -38,7 +38,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.parsed_request_counts = [0] * (n_turns + 1)
         self.violated_request_counts = [0] * (n_turns + 1)
 
-        # Add Prompts to Player Messages
+        # Initiate first turn
         self.initiate(prompt_player_a, prompt_player_b)
 
         self.log_players({
@@ -48,6 +48,44 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             })
 
         self.log_key('n_turns', n_turns)
+
+    def initiate(self, prompt_player_a: str, prompt_player_b: str) -> None:
+        self.log_next_turn()
+        # Player history (List)
+        self.player_a.history.append(
+            {'role': 'user', 'content': prompt_player_a})
+        self.player_b.history.append(
+            {'role': 'user', 'content': prompt_player_b})
+
+        action = {'type': 'send message', 'content': prompt_player_a}
+        self.log_event(from_='GM', to='Player 1', action=action)
+        action = {'type': 'send message', 'content': prompt_player_b}
+        self.log_event(from_='GM', to='Player 2', action=action)
+
+    def play(self) -> None:
+        while self.should_continue():
+            self.current_turn += 1
+            self.log_next_turn()
+            self.turn()
+
+        if self.complete_turns == self.n_turns:
+            action = {'type': 'info', 'content': 'game successful'}
+            self.log_event(from_='GM', to='GM', action=action)
+
+        action = {'type': 'info', 'content': 'end game'}
+        self.log_event(from_='GM', to='GM', action=action)
+        self.log_eval_assets()
+
+    def should_continue(self) -> None:
+        return (self.current_turn < self.n_turns
+                and not self.aborted
+                and not self.lose)
+
+    def process_answer(self):
+        pass
+
+    def is_correct_answer(self):
+        pass
 
 
 class SoundAlikeGameScorer(GameScorer):
