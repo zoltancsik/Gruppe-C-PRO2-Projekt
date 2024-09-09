@@ -5,7 +5,7 @@ from clemgame.clemgame import GameInstanceGenerator
 
 GAME_NAME = 'sound_alike'
 N_INSTANCES = 3
-N_EPISODES = 2
+N_EPISODES = 1
 SEED = 123
 word = "This"  # FIXME: should be a word from word_pool.json
 
