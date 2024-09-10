@@ -1,3 +1,4 @@
+import re
 import copy
 from typing import List, Dict
 from clemgame.clemgame import (DialogueGameMaster,
@@ -22,18 +23,20 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.lose: bool = False
         self.complete_turns: int = 0
 
-    def setup(self, prompt_player_a, prompt_player_b, n_turns, game_id):
+    def setup(self, prompt_player_a, prompt_player_b, n_turns, difficulty, game_id, starting_word):
         # Setting up Players and Prompts
         self.player_a = Guesser(self.model_a, 'Player A')
         self.player_b = Guesser(self.model_b, 'Player B')
         self.prompt_a = prompt_player_a
         self.prompt_b = prompt_player_b
+        self.difficulty = difficulty
 
         # Game Metrics
         self.n_turns = n_turns
         self.current_turn = 0
-        self.starting_word = self._pick_first_word()
+        self.starting_word = starting_word
         self.current_word = None
+        self.game_id = game_id
 
         # Common Metrics
         self.request_counts = [0] * (n_turns + 1)
@@ -77,20 +80,22 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         # self.log_eval_assets()
 
     def conduct_turn(self):
+        # PLAYER A
         answer_a = self._get_answer('a')
-        answer_b = self._get_answer('b')
-
         if not self._validate_answer(answer_a):
             return None
 
+        # Logging A's answer to B's History
+        self._add_answer(answer_a, 'b', 'system')
+        action = {'type': 'send message', 'content': answer_a}
+        self.log_event(from_='GM', to='Player 2', action=action)
+
+        answer_b = self._get_answer('b')
         if not self._validate_answer(answer_b):
             return None
 
-        # Logging and History Updates
-        self._add_answer(answer_a, 'b', 'user')
-        action = {'type': 'send message', 'content': answer_a}
-        self.log_event(from_='GM', to='Player 2', action=action)
-        self._add_answer(answer_b, 'a', 'user')
+        # Logging B's answer to A's History
+        self._add_answer(answer_b, 'a', 'system')
         action = {'type': 'send message', 'content': answer_b}
         self.log_event(from_='GM', to='Player 1', action=action)
 
@@ -102,21 +107,21 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             prompt, raw_answer, answer = self.player_a(self.player_a.history,
                                                        self.current_turn)
             action = {'type': 'get message', 'content': answer}
-            self.log_event(from_='Player 1', to='GM', action=action,
+            self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._add_answer(answer, 'a', 'assistant')
-            print(f"Turn {self.current_turn} | Player A:")
-            print(answer)
+            print("\n")
+            print(f"===[ TURN {self.current_turn} ]===")
+            print(f"- A: {answer}")
 
         else:
             prompt, raw_answer, answer = self.player_b(self.player_b.history,
                                                        self.current_turn)
             action = {'type': 'get message', 'content': answer}
-            self.log_event(from_='Player 2', to='GM', action=action,
+            self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._add_answer(answer, 'b', 'assistant')
-            print(f"Turn {self.current_turn} | Player B:")
-            print(answer)
+            print(f"- B: {answer}")
 
         self.request_counts[self.current_turn] += 1
         return answer
@@ -142,10 +147,8 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         else:
             return False
 
-    def _pick_first_word(self):
-        # FIXME: Needs to be implemented
-        word_pool = self.load_file("resources/word_pool", ".txt")
-        return word_pool
+    def _parse_answer(self):
+        pass
 
 
 class SoundAlikeGameBenchmark(GameBenchmark):
