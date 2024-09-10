@@ -8,7 +8,11 @@ class Guesser(Player):
         self.player: str = player
         self.history: List = []
         self.answer: str = ""
+        self.model = model_name
 
     def _custom_response(self, messages) -> str:
         last_message = messages[-1]["content"]
         return f"My answer to {last_message} is X"
+
+    def __str__(self) -> str:
+        return f"{self.model}"

@@ -5,27 +5,27 @@
             "game_instances": [
                 {
                     "game_id": 0,
-                    "difficulty": "MEDIUM",
+                    "difficulty": "EASY",
                     "n_turns": 5,
-                    "starting_word": "Music",
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Music. Your utterance must look like: '- Music is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Music has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: '- word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
+                    "starting_word": "Apple",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Apple. Your utterance must look like: 'Apple is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Apple has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 },
                 {
                     "game_id": 1,
                     "difficulty": "EASY",
                     "n_turns": 3,
-                    "starting_word": "Basket",
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Basket. Your utterance must look like: '- Basket is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Basket has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 3 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: '- word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 3 turns."
+                    "starting_word": "Robot",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Robot. Your utterance must look like: 'Robot is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Robot has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 3 turns.",
+                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 3 turns."
                 },
                 {
                     "game_id": 2,
-                    "difficulty": "CO-OP",
+                    "difficulty": "MEDIUM",
                     "n_turns": 5,
-                    "starting_word": "Tiger",
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Tiger. Your utterance must look like: '- Tiger is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Tiger has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: '- word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
+                    "starting_word": "Robot",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Robot. Your utterance must look like: 'Robot is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Robot has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 }
             ]
         }
