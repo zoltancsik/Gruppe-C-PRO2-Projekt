@@ -138,15 +138,15 @@ class SoundAlikeGameMaster(DialogueGameMaster):
 
     def _parse_and_validate(self, answer):
         # MOVE_RULE
-        match = re.search(r'similar to (\w+)\.', answer)
-        if isinstance(match.group(1), str):
-            # FIXME: Call the GAME_RULE checks here
-            # print(
-            #       f"GM: {match.group(1)} is in fact similar to "
-            #       f"{self.words_list[-1]}"
-            #      )
-            self.words_list.append(match.group(1))
-            return True
+        match = re.search(r'similar to (\w+)\.', answer).group(1)
+        if isinstance(match, str):
+            if match not in self.words_list:
+                self.words_list.append(match)
+                return True
+            else:
+                print(f"{match} was already used this game!")
+                # FIXME: Game should not end, points should be lost.
+                raise Exception(f"Game Over: {match} was already used!")
         else:
             return False
 
