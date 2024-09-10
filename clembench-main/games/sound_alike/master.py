@@ -1,3 +1,4 @@
+import copy
 from typing import List, Dict
 from clemgame.clemgame import (DialogueGameMaster,
                                GameBenchmark,
@@ -64,11 +65,10 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         while self.continue_round():
             # Main Loop
             self.complete_turns += 1
-            print(f"Complete Turns: {self.complete_turns}")
             self.log_next_turn()
+            self.conduct_turn()
 
         if self.complete_turns == self.n_turns:
-            # End of the Game
             action = {'type': 'info', 'content': 'game successful'}
             self.log_event(from_='GM', to='GM', action=action)
 
@@ -76,13 +76,74 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.log_event(from_='GM', to='GM', action=action)
         # self.log_eval_assets()
 
+    def conduct_turn(self):
+        answer_a = self._get_answer('a')
+        answer_b = self._get_answer('b')
+
+        if not self._validate_answer(answer_a):
+            return None
+
+        if not self._validate_answer(answer_b):
+            return None
+
+        # Logging and History Updates
+        self._add_answer(answer_a, 'b', 'user')
+        action = {'type': 'send message', 'content': answer_a}
+        self.log_event(from_='GM', to='Player 2', action=action)
+        self._add_answer(answer_b, 'a', 'user')
+        action = {'type': 'send message', 'content': answer_b}
+        self.log_event(from_='GM', to='Player 1', action=action)
+
+        self.current_turn += 1
+
+    def _get_answer(self, player):
+        assert player in ('a', 'b')
+        if player == 'a':
+            prompt, raw_answer, answer = self.player_a(self.player_a.history,
+                                                       self.current_turn)
+            action = {'type': 'get message', 'content': answer}
+            self.log_event(from_='Player 1', to='GM', action=action,
+                           call=(copy.deepcopy(prompt), raw_answer))
+            self._add_answer(answer, 'a', 'assistant')
+            print(f"Turn {self.current_turn} | Player A:")
+            print(answer)
+
+        else:
+            prompt, raw_answer, answer = self.player_b(self.player_b.history,
+                                                       self.current_turn)
+            action = {'type': 'get message', 'content': answer}
+            self.log_event(from_='Player 2', to='GM', action=action,
+                           call=(copy.deepcopy(prompt), raw_answer))
+            self._add_answer(answer, 'b', 'assistant')
+            print(f"Turn {self.current_turn} | Player B:")
+            print(answer)
+
+        self.request_counts[self.current_turn] += 1
+        return answer
+
+    def _add_answer(self, utterance, player, role):
+        assert player in ('a', 'b')
+        if player == 'a':
+            self.player_a.history.append({'role': role, 'content': utterance})
+        else:
+            self.player_b.history.append({'role': role, 'content': utterance})
+
+    def _validate_answer(self, answer):
+        # FIXME: Needs to be Implemented
+        if isinstance(answer, str):
+            return True
+        else:
+            return False
+
     def continue_round(self):
+        # FIXME: Needs to be Implemented
         if self.complete_turns < self.n_turns:
             return True
         else:
             return False
 
     def _pick_first_word(self):
+        # FIXME: Needs to be implemented
         word_pool = self.load_file("resources/word_pool", ".txt")
         return word_pool
 
@@ -109,25 +170,3 @@ class SoundAlikeGameBenchmark(GameBenchmark):
 class SoundAlikeGameScorer(GameScorer):
     def __init__():
         pass
-
-
-# def main():
-#     """ FIRST STEP """
-#     bm = SoundAlikeGameBenchmark()
-#     bm.setup()  # Read in Experiments
-#     experiments = bm.instances
-#     gm = bm.create_game_master(bm.instances, ['A', 'B'])
-
-#     """SECOND STEP"""
-#     prompt_a = experiments["experiments"][0]
-#     ["game_instances"][0]["prompt_player_a"]
-#     prompt_b = experiments["experiments"][0]
-#     ["game_instances"][0]["prompt_player_b"]
-#     gm.setup(prompt_a, prompt_b)
-#     print(gm.prompt_a)
-#     print(gm.prompt_b)
-#     print(gm.first_word)
-
-
-# if __name__ == "__main__":
-#     main()
