@@ -1,3 +1,4 @@
+import re
 import copy
 from typing import List, Dict
 from clemgame.clemgame import (DialogueGameMaster,
@@ -21,24 +22,32 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.aborted: bool = False
         self.lose: bool = False
         self.complete_turns: int = 0
+        self.words_list = []
 
-    def setup(self, prompt_player_a, prompt_player_b, n_turns, game_id):
+    def setup(self, prompt_player_a, prompt_player_b,
+              n_turns, difficulty, game_id, starting_word,
+              points_needed):
         # Setting up Players and Prompts
         self.player_a = Guesser(self.model_a, 'Player A')
         self.player_b = Guesser(self.model_b, 'Player B')
         self.prompt_a = prompt_player_a
         self.prompt_b = prompt_player_b
+        self.difficulty = difficulty
+        self.words_list.append(starting_word)
+        self.points_needed = points_needed
+        self.points = 0
 
         # Game Metrics
         self.n_turns = n_turns
-        self.current_turn = 0
-        self.starting_word = self._pick_first_word()
+        self.starting_word = starting_word
         self.current_word = None
+        self.game_id = game_id
+        self.current_turn = 0
 
         # Common Metrics
-        self.request_counts = [0] * (n_turns + 1)
-        self.parsed_request_counts = [0] * (n_turns + 1)
-        self.violated_request_counts = [0] * (n_turns + 1)
+        # self.request_counts = [0] * (n_turns + 1) FIXME: Index Problem
+        # self.parsed_request_counts = [0] * (n_turns + 1)
+        # self.violated_request_counts = [0] * (n_turns + 1)
 
         # Logging
         self.log_players({
@@ -68,7 +77,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             self.log_next_turn()
             self.conduct_turn()
 
-        if self.complete_turns == self.n_turns:
+        if self.points >= self.points_needed:
             action = {'type': 'info', 'content': 'game successful'}
             self.log_event(from_='GM', to='GM', action=action)
 
@@ -77,20 +86,22 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         # self.log_eval_assets()
 
     def conduct_turn(self):
+        # PLAYER A
         answer_a = self._get_answer('a')
-        answer_b = self._get_answer('b')
-
-        if not self._validate_answer(answer_a):
+        if not self._parse_and_validate(answer_a):
             return None
 
-        if not self._validate_answer(answer_b):
-            return None
-
-        # Logging and History Updates
-        self._add_answer(answer_a, 'b', 'user')
+        # Logging A's answer to B's History
+        self._add_answer(answer_a, 'b', 'system')
         action = {'type': 'send message', 'content': answer_a}
         self.log_event(from_='GM', to='Player 2', action=action)
-        self._add_answer(answer_b, 'a', 'user')
+
+        answer_b = self._get_answer('b')
+        if not self._parse_and_validate(answer_b):
+            return None
+
+        # Logging B's answer to A's History
+        self._add_answer(answer_b, 'a', 'system')
         action = {'type': 'send message', 'content': answer_b}
         self.log_event(from_='GM', to='Player 1', action=action)
 
@@ -100,25 +111,28 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         assert player in ('a', 'b')
         if player == 'a':
             prompt, raw_answer, answer = self.player_a(self.player_a.history,
-                                                       self.current_turn)
+                                                       self.n_turns)
             action = {'type': 'get message', 'content': answer}
-            self.log_event(from_='Player 1', to='GM', action=action,
+            self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._add_answer(answer, 'a', 'assistant')
-            print(f"Turn {self.current_turn} | Player A:")
-            print(answer)
+            # FIXME: Build Interface for readability
+            print("\n")
+            print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
+                  f" LVL: {self.difficulty} | "
+                  f"POINTS: {self.points}/{self.points_needed} ]===")
+            print(f"- {self.player_a.model}: {answer}")
 
         else:
             prompt, raw_answer, answer = self.player_b(self.player_b.history,
-                                                       self.current_turn)
+                                                       self.n_turns)
             action = {'type': 'get message', 'content': answer}
-            self.log_event(from_='Player 2', to='GM', action=action,
+            self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._add_answer(answer, 'b', 'assistant')
-            print(f"Turn {self.current_turn} | Player B:")
-            print(answer)
+            print(f"- {self.player_b.model}: {answer}")
 
-        self.request_counts[self.current_turn] += 1
+        # self.request_counts[self.n_turns] += 1 FIXME: index problem
         return answer
 
     def _add_answer(self, utterance, player, role):
@@ -128,24 +142,33 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         else:
             self.player_b.history.append({'role': role, 'content': utterance})
 
-    def _validate_answer(self, answer):
-        # FIXME: Needs to be Implemented
-        if isinstance(answer, str):
-            return True
+    def _parse_and_validate(self, answer):
+        # MOVE_RULE
+        match = re.search(r'similar to (\w+)\.', answer)
+        if match:
+            word = match.group(1)
+            if isinstance(word, str):
+                if match not in self.words_list:
+                    self.points += 1
+                    self.words_list.append(word)
+                    return True
+                else:
+                    print(f"{word} was already used this game, you lost a point")
+                    # FIXME: Add this to the History of the players, so maybe they learn from it?
+                    self.poins -= 1
         else:
+            print(f"MOVE_RULE Violated: {word}")
             return False
 
     def continue_round(self):
         # FIXME: Needs to be Implemented
-        if self.complete_turns < self.n_turns:
+        if self.points < self.points_needed and self.current_turn < self.n_turns:
             return True
         else:
+            print("GAME OVER!")
+            print(f"Points: {self.points}/{self.points_needed} "
+                  f"Round: {self.current_turn}/{self.n_turns}")
             return False
-
-    def _pick_first_word(self):
-        # FIXME: Needs to be implemented
-        word_pool = self.load_file("resources/word_pool", ".txt")
-        return word_pool
 
 
 class SoundAlikeGameBenchmark(GameBenchmark):

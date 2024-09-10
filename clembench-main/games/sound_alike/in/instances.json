@@ -5,21 +5,12 @@
             "game_instances": [
                 {
                     "game_id": 0,
-                    "n_turns": 3,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to This. Your utterance must look like: your_word is similar to This. Give your answer. If you break the rules, you lose.You will play for 3 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. You must come up with phonetically similar word to This. Your utterance must look like: your_word is similar to This give your answer. If you break the rules, you lose. You will play for 3 turns."
-                },
-                {
-                    "game_id": 1,
-                    "n_turns": 4,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to This. Your utterance must look like: your_word is similar to This. Give your answer. If you break the rules, you lose.You will play for 4 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. You must come up with phonetically similar word to This. Your utterance must look like: your_word is similar to This give your answer. If you break the rules, you lose. You will play for 4 turns."
-                },
-                {
-                    "game_id": 2,
-                    "n_turns": 3,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to This. Your utterance must look like: your_word is similar to This. Give your answer. If you break the rules, you lose.You will play for 3 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. You must come up with phonetically similar word to This. Your utterance must look like: your_word is similar to This give your answer. If you break the rules, you lose. You will play for 3 turns."
+                    "difficulty": "EASY",
+                    "n_turns": 10,
+                    "starting_word": "Tiger",
+                    "points_needed": 10,
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Tiger. Your utterance must look like: 'Tiger is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Tiger has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 }
             ]
         }

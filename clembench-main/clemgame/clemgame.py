@@ -819,7 +819,7 @@ class GameBenchmark(GameResourceLocator):
                 error_count = 0
                 time_experiment_start = datetime.now()
                 game_instances: List = experiment["game_instances"]
-                for game_instance in tqdm(game_instances, desc="Playing games"):
+                for game_instance in tqdm(game_instances, desc="Playing games", disable=True):
                     game_id = game_instance["game_id"]
                     self.logger.info("Activity: %s Experiment: %s Episode: %d Game: %s",
                                      self.name, experiment_name, episode_counter, game_id)
