@@ -92,30 +92,41 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             return None
 
         # Logging A's answer to B's History
-        self._add_answer(answer_a, 'b', 'system')
+        self._update_history(answer_a, 'b', 'system')
         action = {'type': 'send message', 'content': answer_a}
         self.log_event(from_='GM', to='Player 2', action=action)
+
+        # Update Points after A's turn
+        points_info = (f"Current Points: {self.points},"
+                       f"Points Needed: {self.points_needed}")
+        self._update_history(points_info, 'a', 'system')
+        self._update_history(points_info, 'b', 'system')
 
         answer_b = self._get_answer('b')
         if not self._parse_and_validate(answer_b):
             return None
 
         # Logging B's answer to A's History
-        self._add_answer(answer_b, 'a', 'system')
+        self._update_history(answer_b, 'a', 'system')
         action = {'type': 'send message', 'content': answer_b}
         self.log_event(from_='GM', to='Player 1', action=action)
+
+        # Update Points after A's turn
+        self._update_history(points_info, 'a', 'system')
+        self._update_history(points_info, 'b', 'system')
 
         self.current_turn += 1
 
     def _get_answer(self, player):
         assert player in ('a', 'b')
         if player == 'a':
+            # The Player's History is passed as an arg before every turn
             prompt, raw_answer, answer = self.player_a(self.player_a.history,
                                                        self.n_turns)
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
-            self._add_answer(answer, 'a', 'assistant')
+            self._update_history(answer, 'a', 'assistant')
             # FIXME: Build Interface for readability
             print("\n")
             print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
@@ -129,13 +140,13 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
-            self._add_answer(answer, 'b', 'assistant')
+            self._update_history(answer, 'b', 'assistant')
             print(f"- {self.player_b.model}: {answer}")
 
         self.request_counts[self.current_turn] += 1
         return answer
 
-    def _add_answer(self, utterance, player, role):
+    def _update_history(self, utterance, player, role):
         assert player in ('a', 'b')
         if player == 'a':
             self.player_a.history.append({'role': role, 'content': utterance})
