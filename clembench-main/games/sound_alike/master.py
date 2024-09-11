@@ -1,5 +1,6 @@
 import re
 import copy
+import json
 from typing import List, Dict
 from clemgame.clemgame import (DialogueGameMaster,
                                GameBenchmark,
@@ -24,14 +25,14 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.complete_turns: int = 0
         self.words_list = []
 
-    def setup(self, prompt_player_a, prompt_player_b,
+    def setup(self, init_prompt_a, init_prompt_b,
               n_turns, difficulty, game_id, starting_word,
               points_needed):
         # Setting up Players and Prompts
-        self.player_a = Guesser(self.model_a, 'Player A')
-        self.player_b = Guesser(self.model_b, 'Player B')
-        self.prompt_a = prompt_player_a
-        self.prompt_b = prompt_player_b
+        self.player_a = Guesser(self.model_a, 'Player A', 0)
+        self.player_b = Guesser(self.model_b, 'Player B', 0)
+        self.init_prompt_a = init_prompt_a
+        self.init_prompt_b = init_prompt_b
         self.difficulty = difficulty
         self.words_list.append(starting_word)
         self.points_needed = points_needed
@@ -62,12 +63,12 @@ class SoundAlikeGameMaster(DialogueGameMaster):
 
         # Appending prompts to player.history
         self.player_a.history.append(
-            {'role': 'user', 'content': prompt_player_a})
+            {'role': 'system', 'content': self.init_prompt_a})
         self.player_b.history.append(
-            {'role': 'user', 'content': prompt_player_b})
-        action = {'type': 'send message', 'content': prompt_player_a}
+            {'role': 'system', 'content': self.init_prompt_b})
+        action = {'type': 'send message', 'content': self.init_prompt_a}
         self.log_event(from_='GM', to='Player 1', action=action)
-        action = {'type': 'send message', 'content': prompt_player_b}
+        action = {'type': 'send message', 'content': self.init_prompt_b}
         self.log_event(from_='GM', to='Player 2', action=action)
 
     def play(self) -> None:
@@ -88,32 +89,24 @@ class SoundAlikeGameMaster(DialogueGameMaster):
     def conduct_turn(self):
         # PLAYER A
         answer_a = self._get_answer('a')
-        if not self._parse_and_validate(answer_a):
+        if not self._parse_and_validate(answer_a, 'a'):
             return None
 
         # Logging A's answer to B's History
-        self._update_history(answer_a, 'b', 'system')
+        self.distribute_points('a', 1)
+        self._update_history(answer_a, 'b', 'user')
         action = {'type': 'send message', 'content': answer_a}
         self.log_event(from_='GM', to='Player 2', action=action)
 
-        # Update Points after A's turn
-        points_info = (f"Current Points: {self.points},"
-                       f"Points Needed: {self.points_needed}")
-        self._update_history(points_info, 'a', 'system')
-        self._update_history(points_info, 'b', 'system')
-
         answer_b = self._get_answer('b')
-        if not self._parse_and_validate(answer_b):
+        if not self._parse_and_validate(answer_b, 'b'):
             return None
 
         # Logging B's answer to A's History
-        self._update_history(answer_b, 'a', 'system')
+        self.distribute_points('b', 1)
+        self._update_history(answer_b, 'a', 'user')
         action = {'type': 'send message', 'content': answer_b}
         self.log_event(from_='GM', to='Player 1', action=action)
-
-        # Update Points after A's turn
-        self._update_history(points_info, 'a', 'system')
-        self._update_history(points_info, 'b', 'system')
 
         self.current_turn += 1
 
@@ -127,12 +120,14 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._update_history(answer, 'a', 'assistant')
+
             # FIXME: Build Interface for readability
             print("\n")
             print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
                   f" LVL: {self.difficulty} | "
-                  f"POINTS: {self.points}/{self.points_needed} ]===")
-            print(f"- {self.player_a.model}: {answer}")
+                  f"POINTS: {self.player_a.points}/{self.player_b.points} ]==="
+                  f"POINTS NEEDED: {self.points_needed}")
+            print(f"A - {self.player_a.model}: {answer}")
 
         else:
             prompt, raw_answer, answer = self.player_b(self.player_b.history,
@@ -141,44 +136,68 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._update_history(answer, 'b', 'assistant')
-            print(f"- {self.player_b.model}: {answer}")
+            print(f"B - {self.player_b.model}: {answer}")
 
-        self.request_counts[self.current_turn] += 1
+        # self.request_counts[self.current_turn] += 1
         return answer
 
-    def _update_history(self, utterance, player, role):
+    def _update_history(self, info, player, role):
         assert player in ('a', 'b')
         if player == 'a':
-            self.player_a.history.append({'role': role, 'content': utterance})
+            self.player_a.history.append({'role': role, 'content': info})
+            with open('history_player_a.json', 'w', encoding='utf-8') as fle:
+                json.dump(self.player_a.history, fle, indent=4, ensure_ascii=False)
         else:
-            self.player_b.history.append({'role': role, 'content': utterance})
+            self.player_b.history.append({'role': role, 'content': info})
+            with open('history_player_b.json', 'w', encoding='utf-8') as fle:
+                json.dump(self.player_b.history, fle, indent=4, ensure_ascii=False)
 
-    def _parse_and_validate(self, answer):
+    def _parse_and_validate(self, answer, player):
         # MOVE_RULE
         match = re.search(r'similar to (\w+)\.', answer)
         if match:
             word = match.group(1)
             if isinstance(word, str):
                 if match not in self.words_list:
-                    self.points += 1
                     self.words_list.append(word)
                     return True
                 else:
                     print(f"{word} was already used, you lost a point")
-                    self.points -= 1
         else:
-            print(f"MOVE_RULE Violated: {word}")
+            print("MOVE_RULE Violated")
             return False
 
+    def get_points(self, player):
+        if player == 'a':
+            return self.player_a.points
+        else:
+            return self.player_b.points
+
+    def distribute_points(self, player, points):
+        if player == 'a':
+            self.player_a.points += points
+            # # Add A's point to B's history
+            # point_msg = (f"Other player {'gained' if points > 0 else 'lost'}"
+            #              f" {abs(points)} point. "
+            #              f"And has {self.player_a.points} points so far")
+            # self._update_history(point_msg, 'b', "system")
+        else:
+            self.player_b.points += points
+            # # Add B's point to A's history
+            # point_msg = (f"Other player {'gained' if points > 0 else 'lost'}"
+            #              f" {abs(points)} point. "
+            #              f"And has {self.player_b.points} points so far")
+            # self._update_history(point_msg, 'a', "system")
+
     def continue_round(self):
-        # FIXME: Needs to be Implemented
-        if self.points < self.points_needed and self.current_turn < self.n_turns:
+        points_a = self.player_a.points
+        points_b = self.player_b.points
+        if (points_a or points_b) < self.points_needed:
             return True
         else:
             print("====================[GAME OVER]====================")
-            print(f"POINTS: {self.points}/{self.points_needed} "
+            print(f"POINTS: A:{points_a} B: {points_b}/{self.points_needed} "
                   f"ROUNDS: {self.current_turn}/{self.n_turns}")
-            return False
 
     def log_eval_assets(self) -> None:
         self.log_key('Played turns', self.current_turn)

@@ -33,9 +33,9 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
                 instance['n_turns'] = n_turns
                 instance['starting_word'] = first_word
                 instance['points_needed'] = 10  # FIXME: Adjust?
-                instance['prompt_player_a'] = self.create_prompt(
+                instance['init_prompt_a'] = self.create_prompt(
                     prompt_a, first_word,  n_turns)
-                instance['prompt_player_b'] = self.create_prompt(
+                instance['init_prompt_b'] = self.create_prompt(
                     prompt_b, first_word,  n_turns)
 
     def _load_custom_prompts(self, difficulty):

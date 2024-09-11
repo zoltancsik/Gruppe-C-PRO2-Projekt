@@ -3,12 +3,13 @@ from clemgame.clemgame import Player
 
 
 class Guesser(Player):
-    def __init__(self, model_name: str, player: str):
+    def __init__(self, model_name: str, player: str, points: int):
         super().__init__(model_name)
         self.player: str = player
         self.history: List = []
         self.answer: str = ""
         self.model = model_name
+        self.points = points
 
     def _custom_response(self, messages) -> str:
         last_message = messages[-1]["content"]
