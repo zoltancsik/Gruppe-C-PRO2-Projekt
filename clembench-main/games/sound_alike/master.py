@@ -83,7 +83,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
 
         action = {'type': 'info', 'content': 'end game'}
         self.log_event(from_='GM', to='GM', action=action)
-        # self.log_eval_assets()
+        self.log_eval_assets()
 
     def conduct_turn(self):
         # PLAYER A
@@ -153,9 +153,8 @@ class SoundAlikeGameMaster(DialogueGameMaster):
                     self.words_list.append(word)
                     return True
                 else:
-                    print(f"{word} was already used this game, you lost a point")
-                    # FIXME: Add this to the History of the players, so maybe they learn from it?
-                    self.poins -= 1
+                    print(f"{word} was already used, you lost a point")
+                    self.points -= 1
         else:
             print(f"MOVE_RULE Violated: {word}")
             return False
@@ -165,10 +164,16 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         if self.points < self.points_needed and self.current_turn < self.n_turns:
             return True
         else:
-            print("GAME OVER!")
-            print(f"Points: {self.points}/{self.points_needed} "
-                  f"Round: {self.current_turn}/{self.n_turns}")
+            print("====================[GAME OVER]====================")
+            print(f"POINTS: {self.points}/{self.points_needed} "
+                  f"ROUNDS: {self.current_turn}/{self.n_turns}")
             return False
+
+    def log_eval_assets(self) -> None:
+        self.log_key('Played turns', self.current_turn)
+        self.log_key('Complete turns', self.complete_turns)
+        self.log_key('Points Collected', self.points)
+        self.log_key('Points Needed', self.points_needed)
 
 
 class SoundAlikeGameBenchmark(GameBenchmark):
