@@ -7,7 +7,7 @@ from clemgame.clemgame import GameInstanceGenerator
 LEVELS = ['EASY', 'MEDIUM', 'CO-OP']
 GAME_NAME = 'sound_alike'
 N_INSTANCES = 3
-N_EPISODES = 1
+N_EPISODES = 2
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -25,7 +25,7 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
 
                 difficulty = random.choice(LEVELS)
                 first_word = self.pick_starting_word(difficulty)
-                n_turns = random.choice([3, 5])
+                n_turns = random.choice([5, 10])
 
                 prompt_a, prompt_b = self._load_custom_prompts(difficulty)
                 instance = self.add_game_instance(experiment, game_id)
@@ -86,4 +86,7 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
 
 
 if __name__ == '__main__':
-    SoundAlikeInstanceGenerator().generate()
+    created_episodes = SoundAlikeInstanceGenerator()
+    created_episodes.generate()
+    print(f"Finished Creating Experiment with {N_EPISODES} Episodes and "
+          f"{N_EPISODES*N_INSTANCES} Instances")
