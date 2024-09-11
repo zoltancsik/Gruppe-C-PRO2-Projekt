@@ -8,6 +8,7 @@ LEVELS = ['EASY', 'MEDIUM', 'CO-OP']
 GAME_NAME = 'sound_alike'
 N_INSTANCES = 3
 N_EPISODES = 1
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class SoundAlikeInstanceGenerator(GameInstanceGenerator):
@@ -38,7 +39,6 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
                     prompt_b, first_word,  n_turns)
 
     def _load_custom_prompts(self, difficulty):
-        base_path = os.getcwd()
         if difficulty == "EASY":
             folder = "level_easy"
         elif difficulty == "MEDIUM":
@@ -49,7 +49,7 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
             self.load_template
             (
                 # FIXME: For this you have to be in the game's folder
-                f'{base_path}/resources/initial_prompts/{folder}/initial_prompt_{x}'
+                f'{script_dir}/resources/initial_prompts/{folder}/initial_prompt_{x}'
             )
             for x in ['a', 'b'])
 
@@ -61,15 +61,13 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
                 nturns=n_turns)
         return text
 
-    def generate(self, filename="in/instances.json", **kwargs):
+    def generate(self, filename=f"{script_dir}/in/instances.json", **kwargs):
         self.on_generate(**kwargs)
         with open(filename, 'w', encoding='utf-8') as json_file:
             json.dump(self.instances, json_file, indent=4, ensure_ascii=False)
 
     def pick_starting_word(self, difficulty):
-        base_path = os.getcwd()
-        # FIXME: For this you have to be in the game's folder
-        with open(f"{base_path}/resources/words/word_pool.json", 'r') as file:
+        with open(f"{script_dir}/resources/words/word_pool.json", 'r') as file:
             word_pool = json.load(file)
 
         # Define syllable counts based on difficulty level
