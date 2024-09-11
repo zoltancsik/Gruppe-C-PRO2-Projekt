@@ -1,6 +1,7 @@
 import json
 import random
 import string
+import os
 from clemgame.clemgame import GameInstanceGenerator
 
 LEVELS = ['EASY', 'MEDIUM', 'CO-OP']
@@ -14,12 +15,6 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
         super().__init__(GAME_NAME)
 
     def on_generate(self):
-        # FIXME: Different Prompts for Different Difficulities
-        prompt_a, prompt_b = (
-            self.load_template(f'resources/initial_prompts/initial_prompt_{x}')
-            for x in ['a', 'b']
-        )
-
         # Create Episodes
         for episode in range(N_EPISODES):
             experiment = self.add_experiment(f"Episode {episode}")
@@ -27,12 +22,13 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
             # Create Game Instances
             for game_id in range(N_INSTANCES):
 
-                difficulity = random.choice(LEVELS)
-                first_word = self.pick_starting_word(difficulity)
+                difficulty = random.choice(LEVELS)
+                first_word = self.pick_starting_word(difficulty)
                 n_turns = random.choice([3, 5])
 
+                prompt_a, prompt_b = self._load_custom_prompts(difficulty)
                 instance = self.add_game_instance(experiment, game_id)
-                instance['difficulty'] = difficulity
+                instance['difficulty'] = difficulty
                 instance['n_turns'] = n_turns
                 instance['starting_word'] = first_word
                 instance['points_needed'] = 10  # FIXME: Adjust?
@@ -40,6 +36,24 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
                     prompt_a, first_word,  n_turns)
                 instance['prompt_player_b'] = self.create_prompt(
                     prompt_b, first_word,  n_turns)
+
+    def _load_custom_prompts(self, difficulty):
+        base_path = os.getcwd()
+        if difficulty == "EASY":
+            folder = "level_easy"
+        elif difficulty == "MEDIUM":
+            folder = "level_medium"
+        elif difficulty == "CO-OP":
+            folder = "level_coop"
+        prompt_a, prompt_b = (
+            self.load_template
+            (
+                # FIXME: For this you have to be in the game's folder
+                f'{base_path}/resources/initial_prompts/{folder}/initial_prompt_{x}'
+            )
+            for x in ['a', 'b'])
+
+        return prompt_a, prompt_b
 
     def create_prompt(self, prompt: str, word: str, n_turns: int) -> str:
         text = string.Template(prompt).substitute(
@@ -53,7 +67,9 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
             json.dump(self.instances, json_file, indent=4, ensure_ascii=False)
 
     def pick_starting_word(self, difficulty):
-        with open("resources/words/word_pool.json", 'r') as file:
+        base_path = os.getcwd()
+        # FIXME: For this you have to be in the game's folder
+        with open(f"{base_path}/resources/words/word_pool.json", 'r') as file:
             word_pool = json.load(file)
 
         # Define syllable counts based on difficulty level

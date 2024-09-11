@@ -1,6 +1,7 @@
 import re
 import copy
 from typing import List, Dict
+import sys
 from clemgame.clemgame import (DialogueGameMaster,
                                GameBenchmark,
                                GameScorer,
@@ -8,6 +9,9 @@ from clemgame.clemgame import (DialogueGameMaster,
 from games.sound_alike.players import Guesser
 
 GAME_NAME = "sound_alike"
+
+
+sys.path.append('/home/zoltan/Desktop/PROIIRAMA/Gruppe-C-PRO2-Projekt/clembench-main')
 
 
 class SoundAlikeGameMaster(DialogueGameMaster):
