@@ -45,9 +45,9 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.current_turn = 0
 
         # Common Metrics
-        # self.request_counts = [0] * (n_turns + 1) FIXME: Index Problem
-        # self.parsed_request_counts = [0] * (n_turns + 1)
-        # self.violated_request_counts = [0] * (n_turns + 1)
+        self.request_counts = [0] * (n_turns + 1)
+        self.parsed_request_counts = [0] * (n_turns + 1)
+        self.violated_request_counts = [0] * (n_turns + 1)
 
         # Logging
         self.log_players({
@@ -132,7 +132,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             self._add_answer(answer, 'b', 'assistant')
             print(f"- {self.player_b.model}: {answer}")
 
-        # self.request_counts[self.n_turns] += 1 FIXME: index problem
+        self.request_counts[self.current_turn] += 1
         return answer
 
     def _add_answer(self, utterance, player, role):

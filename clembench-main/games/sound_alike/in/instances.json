@@ -6,24 +6,24 @@
                 {
                     "game_id": 0,
                     "difficulty": "EASY",
-                    "n_turns": 10,
-                    "starting_word": "Basket",
+                    "n_turns": 5,
+                    "starting_word": "Mirror",
                     "points_needed": 10,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Basket. Your utterance must look like: 'Basket is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Basket has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 10 turns.",
-                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 10 turns."
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Mirror. Your utterance must look like: 'Mirror is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Mirror has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 },
                 {
                     "game_id": 1,
-                    "difficulty": "EASY",
+                    "difficulty": "CO-OP",
                     "n_turns": 5,
-                    "starting_word": "Music",
+                    "starting_word": "Candle",
                     "points_needed": 10,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Music. Your utterance must look like: 'Music is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Music has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Candle. Your utterance must look like: 'Candle is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Candle has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
                     "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 },
                 {
                     "game_id": 2,
-                    "difficulty": "EASY",
+                    "difficulty": "CO-OP",
                     "n_turns": 10,
                     "starting_word": "Basket",
                     "points_needed": 10,
@@ -39,27 +39,27 @@
                     "game_id": 0,
                     "difficulty": "CO-OP",
                     "n_turns": 5,
-                    "starting_word": "Mirror",
+                    "starting_word": "Robot",
                     "points_needed": 10,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Mirror. Your utterance must look like: 'Mirror is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Mirror has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Robot. Your utterance must look like: 'Robot is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Robot has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
                     "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 },
                 {
                     "game_id": 1,
                     "difficulty": "CO-OP",
                     "n_turns": 10,
-                    "starting_word": "Button",
+                    "starting_word": "Mirror",
                     "points_needed": 10,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Button. Your utterance must look like: 'Button is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Button has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 10 turns.",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Mirror. Your utterance must look like: 'Mirror is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Mirror has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 10 turns.",
                     "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 10 turns."
                 },
                 {
                     "game_id": 2,
-                    "difficulty": "MEDIUM",
+                    "difficulty": "EASY",
                     "n_turns": 5,
-                    "starting_word": "Mirror",
+                    "starting_word": "Basket",
                     "points_needed": 10,
-                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Mirror. Your utterance must look like: 'Mirror is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Mirror has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
+                    "prompt_player_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Basket. Your utterance must look like: 'Basket is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Basket has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns.",
                     "prompt_player_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount. You are not allowed to use a word that has been used already. You will play for 5 turns."
                 }
             ]

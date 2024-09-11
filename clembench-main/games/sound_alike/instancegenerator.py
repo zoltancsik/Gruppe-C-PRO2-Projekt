@@ -48,7 +48,6 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
         prompt_a, prompt_b = (
             self.load_template
             (
-                # FIXME: For this you have to be in the game's folder
                 f'{script_dir}/resources/initial_prompts/{folder}/initial_prompt_{x}'
             )
             for x in ['a', 'b'])
