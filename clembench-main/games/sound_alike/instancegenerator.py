@@ -4,10 +4,10 @@ import string
 import os
 from clemgame.clemgame import GameInstanceGenerator
 
-LEVELS = ['EASY', 'MEDIUM', 'CO-OP']
+LEVELS = ['EASY']
 GAME_NAME = 'sound_alike'
-N_INSTANCES = 3
-N_EPISODES = 2
+N_INSTANCES = 1
+N_EPISODES = 1
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -26,17 +26,18 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
                 difficulty = random.choice(LEVELS)
                 first_word = self.pick_starting_word(difficulty)
                 n_turns = random.choice([5, 10])
+                max_p = 5  # FIXME: Adjust to each difficulty
 
                 prompt_a, prompt_b = self._load_custom_prompts(difficulty)
                 instance = self.add_game_instance(experiment, game_id)
                 instance['difficulty'] = difficulty
                 instance['n_turns'] = n_turns
                 instance['starting_word'] = first_word
-                instance['points_needed'] = 10  # FIXME: Adjust?
+                instance['points_needed'] = max_p
                 instance['init_prompt_a'] = self.create_prompt(
-                    prompt_a, first_word,  n_turns)
+                    prompt_a, first_word,  n_turns, max_p)
                 instance['init_prompt_b'] = self.create_prompt(
-                    prompt_b, first_word,  n_turns)
+                    prompt_b, first_word,  n_turns, max_p)
 
     def _load_custom_prompts(self, difficulty):
         if difficulty == "EASY":
@@ -54,10 +55,13 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
 
         return prompt_a, prompt_b
 
-    def create_prompt(self, prompt: str, word: str, n_turns: int) -> str:
+    def create_prompt(self, prompt: str,
+                      word: str, n_turns: int,
+                      max_p: int) -> str:
         text = string.Template(prompt).substitute(
                 t_word=word,
-                nturns=n_turns)
+                nturns=n_turns,
+                max_p=max_p)
         return text
 
     def generate(self, filename=f"{script_dir}/in/instances.json", **kwargs):

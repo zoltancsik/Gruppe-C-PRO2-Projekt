@@ -113,7 +113,8 @@ class SoundAlikeGameMaster(DialogueGameMaster):
     def _get_answer(self, player):
         assert player in ('a', 'b')
         if player == 'a':
-            # The Player's History is passed as an arg before every turn
+            # The Player's History is turned into a prompt
+            # With the Player classes __call__ method.
             prompt, raw_answer, answer = self.player_a(self.player_a.history,
                                                        self.n_turns)
             action = {'type': 'get message', 'content': answer}
@@ -125,8 +126,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             print("\n")
             print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
                   f" LVL: {self.difficulty} | "
-                  f"POINTS: {self.player_a.points}/{self.player_b.points} ]==="
-                  f"POINTS NEEDED: {self.points_needed}")
+                  f"POINTS: A:{self.player_a.points}|B:{self.player_b.points} Out of {self.points_needed}]===")
             print(f"A - {self.player_a.model}: {answer}")
 
         else:
@@ -138,7 +138,6 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             self._update_history(answer, 'b', 'assistant')
             print(f"B - {self.player_b.model}: {answer}")
 
-        # self.request_counts[self.current_turn] += 1
         return answer
 
     def _update_history(self, info, player, role):
@@ -154,7 +153,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
 
     def _parse_and_validate(self, answer, player):
         # MOVE_RULE
-        match = re.search(r'similar to (\w+)\.', answer)
+        match = re.search(r'MY GUESS: (\w+)', answer)
         if match:
             word = match.group(1)
             if isinstance(word, str):

@@ -5,12 +5,12 @@
             "game_instances": [
                 {
                     "game_id": 0,
-                    "difficulty": "MEDIUM",
+                    "difficulty": "EASY",
                     "n_turns": 5,
-                    "starting_word": "Button",
-                    "points_needed": 10,
-                    "init_prompt_a": "You are playing the SoundAlike Game. You must come up with phonetically similar word to Button. Your utterance must look like: 'Button is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables Button has, your guess must have the same amount.",
-                    "init_prompt_b": "You are playing the SoundAlike Game. Player A picked a word, you must come up with a phonetically similar word. Your utterance must look like: 'word_recieved is similar to (your guess).Your partner will have to answer with a new word with the same rules Consider how many syllables word_recieved has, your guess must have the same amount."
+                    "starting_word": "Mirror",
+                    "points_needed": 5,
+                    "init_prompt_a": "Your task is to come up with a word that sounds similar to 'Mirror'. Your have to reach 5 points before the other player. Make sure your guess has the same number of syllables as 'Mirror'. Your answer must follow this format: [Previous Word] -  MY GUESS: word. Your answer can not contain special characters or any other information.Each round, you consider your partner's current points, if you think the other player is ahead of you and you cannot win, you can use a wildcard word House. Try not to use words that have been used beofe, unless you must",
+                    "init_prompt_b": "Your task is to come up with a word that sounds similar to what the player before you said'. Your have to reach 5 points before the other player. Make sure your guess has the same number of syllables as 'Mirror'. Your answer must follow this format: [Previous Word] -   MY GUESS: word. Your answer can not contain special characters or any other information.Each round, you consider your partner's current points, if you think the other player is ahead of you and you cannot win, you can use a wildcard word House. Try not to use words that have been used beofe, unless you must"
                 }
             ]
         }
