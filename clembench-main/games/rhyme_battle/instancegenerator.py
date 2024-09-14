@@ -6,8 +6,8 @@ from clemgame.clemgame import GameInstanceGenerator
 
 LEVELS = ['EASY', 'HARD', 'CO-OP']
 GAME_NAME = 'rhyme_battle'
-N_INSTANCES = 2
-N_EPISODES = 1
+N_INSTANCES = 3
+N_EPISODES = 2
 WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,9 +26,8 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
 
                 difficulty = random.choice(LEVELS)
                 first_word = self.pick_starting_word(difficulty)
-                n_turns = random.choice([5, 10])
-                max_p = 5  # FIXME: Adjust to each difficulty
-
+                n_turns = random.choice([10, 20])
+                max_p = 12
                 prompt_a, prompt_b = self._load_custom_prompts(difficulty)
                 instance = self.add_game_instance(experiment, game_id)
                 instance['difficulty'] = difficulty
@@ -61,11 +60,10 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
                       word: str, n_turns: int,
                       max_p: int,
                       wild_cards: list) -> str:
+
         text = string.Template(prompt).substitute(
-                t_word=word,
-                nturns=n_turns,
-                max_p=max_p,
-                wild_cards=wild_cards)
+                t_word=word, nturns=n_turns,
+                max_p=max_p, wild_cards=wild_cards)
         return text
 
     def generate(self, filename=f"{script_dir}/in/instances.json", **kwargs):
