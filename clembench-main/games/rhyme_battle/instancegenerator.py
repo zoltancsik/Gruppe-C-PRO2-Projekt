@@ -5,14 +5,14 @@ import os
 from clemgame.clemgame import GameInstanceGenerator
 
 LEVELS = ['EASY']
-GAME_NAME = 'sound_alike'
+GAME_NAME = 'rhyme_battle'
 N_INSTANCES = 1
 N_EPISODES = 1
 WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-class SoundAlikeInstanceGenerator(GameInstanceGenerator):
+class RhymeBattleInstanceGenerator(GameInstanceGenerator):
     def __init__(self):
         super().__init__(GAME_NAME)
 
@@ -92,7 +92,7 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
 
 
 if __name__ == '__main__':
-    created_episodes = SoundAlikeInstanceGenerator()
+    created_episodes = RhymeBattleInstanceGenerator()
     created_episodes.generate()
     print(f"Finished Creating Experiment with {N_EPISODES} Episodes and "
           f"{N_EPISODES*N_INSTANCES} Instances")

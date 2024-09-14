@@ -6,13 +6,13 @@ from clemgame.clemgame import (DialogueGameMaster,
                                GameBenchmark,
                                GameScorer,
                                GameMaster)
-from games.sound_alike.players import Guesser
+from games.rhyme_battle.players import Guesser
 
-GAME_NAME = "sound_alike"
+GAME_NAME = "rhyme_battle"
 WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 
 
-class SoundAlikeGameMaster(DialogueGameMaster):
+class RhymeBattleGameMaster(DialogueGameMaster):
     def __init__(self, experiment: Dict, players: List[str]):
         super().__init__(GAME_NAME, experiment, players)
 
@@ -219,7 +219,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.log_key('Points Needed', self.points_needed)
 
 
-class SoundAlikeGameBenchmark(GameBenchmark):
+class RhymeBattleGameBenchmark(GameBenchmark):
     def __init__(self):
         super().__init__(GAME_NAME)
 
@@ -235,9 +235,9 @@ class SoundAlikeGameBenchmark(GameBenchmark):
                            experiment: Dict,
                            players: List[str]
                            ) -> GameMaster:
-        return SoundAlikeGameMaster(experiment, players)
+        return RhymeBattleGameMaster(experiment, players)
 
 
-class SoundAlikeGameScorer(GameScorer):
+class RhymeBattleGameScorer(GameScorer):
     def __init__():
         pass
