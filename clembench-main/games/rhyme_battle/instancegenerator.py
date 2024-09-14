@@ -6,7 +6,7 @@ from clemgame.clemgame import GameInstanceGenerator
 
 LEVELS = ['EASY']
 GAME_NAME = 'rhyme_battle'
-N_INSTANCES = 1
+N_INSTANCES = 2
 N_EPISODES = 1
 WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -73,7 +73,7 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
             json.dump(self.instances, json_file, indent=4, ensure_ascii=False)
 
     def pick_starting_word(self, difficulty):
-        with open(f"{script_dir}/resources/words/word_pool.json", 'r') as file:
+        with open(f"{script_dir}/resources/starting_words/starting_words_pool.json", 'r') as file:
             word_pool = json.load(file)
 
         # Define syllable counts based on difficulty level
