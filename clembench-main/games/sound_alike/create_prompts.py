@@ -1,8 +1,10 @@
 with open('resources/initial_prompts/level_easy/initial_prompt_a.template', 'w') as file:
     file.write(
-        "Your task is to come up with a word that sounds similar to '$t_word'. "
+        "Your task come up with a  word that likely rhymes with '$t_word', using phonetic rules. "
+        "Two words rhyme if they share the same vowel in the last stressed syllable and all following sounds. "
+        "Try toProvide a perfect rhyming word (exact match after the stressed vowel) or a near rhyming word (minor variations allowed)."
+        "Use phonetic transcriptions similar to those in linguistic dictionaries like CMUdict."
         "Your have to reach $max_p points before the other player. "
-        "Make sure your guess has the same number of syllables as '$t_word'. "
         "Your answer must follow this format: [Previous Word] -  MY GUESS: word. "
         "Your answer can not contain special characters or any other information."
         "Each round, you consider your partner's current points, "
@@ -14,9 +16,11 @@ with open('resources/initial_prompts/level_easy/initial_prompt_a.template', 'w')
 
 with open('resources/initial_prompts/level_easy/initial_prompt_b.template', 'w') as file:
     file.write(
-        "Your task is to come up with a word that sounds similar to what the player before you said'. "
+        "Your task is to find a word that rhymes with the word the other player said, using phonetic rules. "
+        "Two words rhyme if they share the same vowel in the last stressed syllable and all following sounds. "
+        "Try toProvide a perfect rhyming word (exact match after the stressed vowel) or a near rhyming word (minor variations allowed)."
+        "Use phonetic transcriptions similar to those in linguistic dictionaries like CMUdict."
         "Your have to reach $max_p points before the other player. "
-        "Make sure your guess has the same number of syllables as '$t_word'. "
         "Your answer must follow this format: [Previous Word] -   MY GUESS: word. "
         "Your answer can not contain special characters or any other information."
         "if you think the other player is trying to trick you "
