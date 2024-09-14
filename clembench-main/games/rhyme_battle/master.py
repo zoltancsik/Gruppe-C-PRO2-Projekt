@@ -161,7 +161,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                     answer,
                     self.player_b if player.name == "Player A"
                     else self.player_a, 'user')
-                self.last_word = word
             else:
                 # GAME RULE violated
                 return False
@@ -184,7 +183,8 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 if self.trick_attempt == 1:
                     self.trick_attempt = 0
                     player.distribute_points(1)
-                    self._update_history(f"You were caught you cheating, the game goes on with {self.last_word}", self.player_a, "system")
+                    self._update_history(f"You were caught cheating, the game goes on with {self.last_word}", self.player_a, "system")
+                    self._update_history("You caught the other player cheating", player, "system")
                     return True
                 else:
                     self._update_history(f"You called the other player out for cheating, but he was not. Game continues with {self.last_word}", player, "system")
@@ -196,21 +196,20 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             rhyme_score = rhyme_validator.validate_guess()
             if rhyme_score >= 0:
                 player.distribute_points(1)
-                print(f"Score: {rhyme_score}")  # Very good Guess
-                print(f"Current Last Word: {self.last_word}")
+                self.last_word = word
                 return True
                 # FIXME: Add else condition here, but refine rhyming check first
         else:
-            print("World was already used")
-            print(f"Player: {player}")
             player.distribute_points(-0.5)
-            self._update_history(f"Last turn, you falsely guessed {word}, which was already used, please provide a new one that rhymes with {self.last_word}"
-                                 f" Words used so far: {self.words_list}", player, "system")
             self._update_history(
-                    f"I guessed wrong, game continues with {self.words_list[-1]} | Words we used so far {self.words_list}",
+                    f"My Guess '{word}' was invalid, word was already used | "
+                    f"Guesses so far: {self.words_list}", player, "assistant")
+            self._update_history(
+                    f"Guess '{word}' was invalid, word was already used."
+                    f"Game continues with {self.words_list[-1]} | "
+                    f"Guesses so far: {self.words_list}",
                     self.player_b if player.name == "Player A"
                     else self.player_a, 'user')
-            self.last_word = word
             return False
 
     def log_eval_assets(self) -> None:
