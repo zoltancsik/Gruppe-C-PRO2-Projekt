@@ -119,20 +119,22 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
 
-            # FIXME: Build Interface for readability
-            print("\n")
-            print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
-                  f" LVL: {self.difficulty} | "
-                  f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
-                  f"/{self.points_needed}]===")
-            print(f"A - {self.player_a.model}: {answer}")
+            # if self.difficulty == "EASY":
+            #     # FIXME: Build Interface for readability
+            #     print("\n")
+            #     print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
+            #           f" LVL: {self.difficulty} | "
+            #           f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
+            #           f"/{self.points_needed}]===")
+            #     print(f"A - {self.player_a.model}: {answer}")
+            # elif self.difficulty == "HARD":
 
         else:
             prompt, raw_answer, answer = self.player_b(self.player_b.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
-            print(f"B - {self.player_b.model}: {answer}")
+            # print(f"B - {self.player_b.model}: {answer}")
 
         return answer
 
@@ -150,25 +152,36 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             json.dump(player_obj.history, fle, indent=4, ensure_ascii=False)
 
     def _parse_answer(self, answer, player):
-        match = re.search(r'MY GUESS: (\w+)', answer)
-        if match:
-            word = match.group(1)
-            if self._validate_answer(word, player):
-                # Send Player's guess to player's history as assistant
-                self._update_history(answer, player, 'assistant')
-                # Send Player's guess to other players' history as user
-                self._update_history(
-                    answer,
-                    self.player_b if player.name == "Player A"
-                    else self.player_a, 'user')
-                return True
+        if self.difficulty == "EASY":
+            match = re.search(r'MY GUESS: (\w+)', answer)
+            if match:
+                word = match.group(1)
+                if self._validate_answer(word, player):
+                    # Send Player's guess to player's history as assistant
+                    self._update_history(answer, player, 'assistant')
+                    # Send Player's guess to other players' history as user
+                    self._update_history(
+                        answer,
+                        self.player_b if player.name == "Player A"
+                        else self.player_a, 'user')
+                    return True
+                else:
+                    # GAME RULE violated
+                    return False
             else:
-                # GAME RULE violated
+                # MOVE_RULE violated
+                print("MOVE_RULE Violated")
                 return False
-        else:
-            # MOVE_RULE violated
-            print("MOVE_RULE Violated")
-            return False
+
+        elif self.difficulty == "HARD":
+            pattern = r'\b\w+\b(?=[^\w]*$)'
+            word = re.search(pattern, answer)
+            if word:
+                # MOVE_RULE Passed
+                print(word.group())
+            else:
+                # MOVE_RULE Failed
+                return False
 
     def _validate_answer(self, word, player):
         # GAME RULES
