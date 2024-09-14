@@ -43,8 +43,8 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
     def _load_custom_prompts(self, difficulty):
         if difficulty == "EASY":
             folder = "level_easy"
-        elif difficulty == "MEDIUM":
-            folder = "level_medium"
+        elif difficulty == "HARD":
+            folder = "level_hard"
         elif difficulty == "CO-OP":
             folder = "level_coop"
         prompt_a, prompt_b = (
@@ -79,7 +79,7 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
         # Define syllable counts based on difficulty level
         if difficulty == "EASY":
             syllables = 2
-        elif difficulty == "MEDIUM":
+        elif difficulty == "HARD":
             syllables = 2  # FIXME: Adjust
         elif difficulty == "CO-OP":
             syllables = 2  # FIXME: Adjust
