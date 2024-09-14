@@ -145,9 +145,33 @@ if __name__ == '__main__':
         "Try not to use words that have been used before"
     )
 
+    prompt_hard_a = (
+        "Your task is to come up with a sentence that's last word rhymes with $t_word "
+        "Rhyming rules: Two words rhyme if they share the same vowel in the last stressed syllable and all following sounds. "
+        "Try to Provide a perfect rhyming word (exact match after the stressed vowel) or a near rhyming word (minor variations allowed)."
+        "Use phonetic transcriptions similar to those in linguistic dictionaries like CMUdict."
+        "Your have to reach $max_p points before the other player. "
+        "Your answer can only consist of your sentence "
+        "Your answer can not contain special characters."
+        "Try not to use words at the end of your sentence that have been used before"
+    )
+
+    prompt_hard_b = (
+        "Your task is to come up with a sentence that rhymes with the last word the other player said "
+        "Rhyming rules: Two words rhyme if they share the same vowel in the last stressed syllable and all following sounds. "
+        "Try to Provide a perfect rhyming word (exact match after the stressed vowel) or a near rhyming word (minor variations allowed)."
+        "Use phonetic transcriptions similar to those in linguistic dictionaries like CMUdict."
+        "Your have to reach $max_p points before the other player. "
+        "Your answer can only consist of your sentence "
+        "Your answer can not contain special characters."
+        "Try not to use words at the end of your sentence that have been used before"
+    )
+
     prompt_generator = PromptGenerator()
     prompt_generator.generate_prompt("EASY", prompt_easy_a, 'a')
     prompt_generator.generate_prompt("EASY", prompt_easy_b, 'b')
+    prompt_generator.generate_prompt("HARD", prompt_hard_a, 'a')
+    prompt_generator.generate_prompt("HARD", prompt_hard_b, 'b')
     prompt_generator.generator_infos()
     created_episodes = RhymeBattleInstanceGenerator()
     created_episodes.generate()
