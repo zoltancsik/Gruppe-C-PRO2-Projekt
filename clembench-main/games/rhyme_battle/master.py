@@ -92,7 +92,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         # PLAYER A
         answer_a = self._get_answer('a')
         # MOVE_RULE VIOLATED
-        if not self._parse_and_validate(answer_a, 'a'):
+        if not self._parse_answer(answer_a, 'a'):
             self._update_history(f"{answer_a} was invalid", 'b', 'user')
 
         else:
@@ -105,7 +105,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
         answer_b = self._get_answer('b')
         # MOVE RULE VIOLATED
-        if not self._parse_and_validate(answer_b, 'b'):
+        if not self._parse_answer(answer_b, 'b'):
             self._update_history(f"{answer_b} was invalid", 'a', 'user')
 
         else:
@@ -166,28 +166,26 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             with open('history_player_b.json', 'w', encoding='utf-8') as fle:
                 json.dump(self.player_b.history, fle, indent=4, ensure_ascii=False)
 
-    def _parse_and_validate(self, answer, player):
-        # MOVE_RULE
+    def _parse_answer(self, answer, player):
+        # MOVE_RULE: Answer has to include MY GUESS: word
         match = re.search(r'MY GUESS: (\w+)', answer)
         if match:
             word = match.group(1)
-            if isinstance(word, str):
-                if word not in self.words_list:
-                    if word in WILD_CARDS:
-                        self.trick_attempt = 1
-                        # self._update_history("Trying to trick the other Player", 'a', 'system')
-                    elif word == "JINX" and self.trick_attempt == 1:
-                        self.trick_attempt = 0
-                        print("Player A tried to cheat!!!")
-                        # self._update_history("You detected the other player's cheating move", 'b', 'system')
-                    elif word not in WILD_CARDS and word != "JINX":
-                        self.words_list.append(word)
-                    return True
-                else:
-                    print(f"Player {player}: {word} was already used, you lost a point")
-                    return False
+            if self._validate_answer(word, player):
+                return True
+            else:
+                print("GAME_RULE violated")
+                return False
         else:
-            print("MOVE_RULE Violated")
+            print("MOVE_RULE Violated, input bad format")  # FIXME: Remove
+            return False
+
+    def _validate_answer(self, word, player):
+        # GAME RULES
+        if word not in self.words_list:
+            return True
+        else:
+            print(f"Player {player}: {word} was already used")
             return False
 
     def get_points(self, player):
