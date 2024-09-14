@@ -9,6 +9,7 @@ from clemgame.clemgame import (DialogueGameMaster,
 from games.sound_alike.players import Guesser
 
 GAME_NAME = "sound_alike"
+WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 
 
 class SoundAlikeGameMaster(DialogueGameMaster):
@@ -37,6 +38,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         self.words_list.append(starting_word)
         self.points_needed = points_needed
         self.points = 0
+        self.trick_attempt = 0
 
         # Game Metrics
         self.n_turns = n_turns
@@ -89,24 +91,33 @@ class SoundAlikeGameMaster(DialogueGameMaster):
     def conduct_turn(self):
         # PLAYER A
         answer_a = self._get_answer('a')
+        # MOVE_RULE VIOLATED
         if not self._parse_and_validate(answer_a, 'a'):
-            return None
+            self._update_history(f"{answer_a} was invalid", 'b', 'user')
 
-        # Logging A's answer to B's History
-        self.distribute_points('a', 1)
-        self._update_history(answer_a, 'b', 'user')
-        action = {'type': 'send message', 'content': answer_a}
-        self.log_event(from_='GM', to='Player 2', action=action)
+        else:
+            # Logging A's answer to B's History
+            self.distribute_points('a', 0.5)
+
+            self._update_history(answer_a, 'b', 'user')
+            action = {'type': 'send message', 'content': answer_a}
+            self.log_event(from_='GM', to='Player 2', action=action)
 
         answer_b = self._get_answer('b')
+        # MOVE RULE VIOLATED
         if not self._parse_and_validate(answer_b, 'b'):
-            return None
+            self._update_history(f"{answer_b} was invalid", 'a', 'user')
 
-        # Logging B's answer to A's History
-        self.distribute_points('b', 1)
-        self._update_history(answer_b, 'a', 'user')
-        action = {'type': 'send message', 'content': answer_b}
-        self.log_event(from_='GM', to='Player 1', action=action)
+        else:
+            # Logging B's answer to A's History
+            self.distribute_points('b', 0.5)
+
+            self._update_history(answer_b, 'a', 'user')
+            action = {'type': 'send message', 'content': answer_b}
+            self.log_event(from_='GM', to='Player 1', action=action)
+
+        self._update_history(f"Round: {self.current_turn} | Words so far: {self.words_list} | Points Player A: {self.player_a.points}", "a", "system")
+        self._update_history(f"Round: {self.current_turn} | Words so far: {self.words_list} | Points Player B: {self.player_b.points}", "b", "system")
 
         self.current_turn += 1
 
@@ -115,12 +126,16 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         if player == 'a':
             # The Player's History is turned into a prompt
             # With the Player classes __call__ method.
-            prompt, raw_answer, answer = self.player_a(self.player_a.history,
-                                                       self.n_turns)
+            # self.player_a.history.append(f"Words so far {self.words_list}")
+            prompt, raw_answer, answer = self.player_a(self.player_a.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
             self._update_history(answer, 'a', 'assistant')
+
+            # print("\n")
+            # print(prompt)
+            # print("\n")
 
             # FIXME: Build Interface for readability
             print("\n")
@@ -130,8 +145,7 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             print(f"A - {self.player_a.model}: {answer}")
 
         else:
-            prompt, raw_answer, answer = self.player_b(self.player_b.history,
-                                                       self.n_turns)
+            prompt, raw_answer, answer = self.player_b(self.player_b.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
@@ -157,11 +171,20 @@ class SoundAlikeGameMaster(DialogueGameMaster):
         if match:
             word = match.group(1)
             if isinstance(word, str):
-                if match not in self.words_list:
-                    self.words_list.append(word)
+                if word not in self.words_list:
+                    if word in WILD_CARDS:
+                        self.trick_attempt = 1
+                        # self._update_history("Trying to trick the other Player", 'a', 'system')
+                    elif word == "JINX" and self.trick_attempt == 1:
+                        self.trick_attempt = 0
+                        print("Player A tried to cheat!!!")
+                        # self._update_history("You detected the other player's cheating move", 'b', 'system')
+                    elif word not in WILD_CARDS and word != "JINX":
+                        self.words_list.append(word)
                     return True
                 else:
-                    print(f"{word} was already used, you lost a point")
+                    print(f"Player {player}: {word} was already used, you lost a point")
+                    return False
         else:
             print("MOVE_RULE Violated")
             return False
@@ -175,18 +198,8 @@ class SoundAlikeGameMaster(DialogueGameMaster):
     def distribute_points(self, player, points):
         if player == 'a':
             self.player_a.points += points
-            # # Add A's point to B's history
-            # point_msg = (f"Other player {'gained' if points > 0 else 'lost'}"
-            #              f" {abs(points)} point. "
-            #              f"And has {self.player_a.points} points so far")
-            # self._update_history(point_msg, 'b', "system")
         else:
             self.player_b.points += points
-            # # Add B's point to A's history
-            # point_msg = (f"Other player {'gained' if points > 0 else 'lost'}"
-            #              f" {abs(points)} point. "
-            #              f"And has {self.player_b.points} points so far")
-            # self._update_history(point_msg, 'a', "system")
 
     def continue_round(self):
         points_a = self.player_a.points

@@ -8,6 +8,7 @@ LEVELS = ['EASY']
 GAME_NAME = 'sound_alike'
 N_INSTANCES = 1
 N_EPISODES = 1
+WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -35,9 +36,9 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
                 instance['starting_word'] = first_word
                 instance['points_needed'] = max_p
                 instance['init_prompt_a'] = self.create_prompt(
-                    prompt_a, first_word,  n_turns, max_p)
+                    prompt_a, first_word,  n_turns, max_p, WILD_CARDS)
                 instance['init_prompt_b'] = self.create_prompt(
-                    prompt_b, first_word,  n_turns, max_p)
+                    prompt_b, first_word,  n_turns, max_p, WILD_CARDS)
 
     def _load_custom_prompts(self, difficulty):
         if difficulty == "EASY":
@@ -57,11 +58,13 @@ class SoundAlikeInstanceGenerator(GameInstanceGenerator):
 
     def create_prompt(self, prompt: str,
                       word: str, n_turns: int,
-                      max_p: int) -> str:
+                      max_p: int,
+                      wild_cards: list) -> str:
         text = string.Template(prompt).substitute(
                 t_word=word,
                 nturns=n_turns,
-                max_p=max_p)
+                max_p=max_p,
+                wild_cards=wild_cards)
         return text
 
     def generate(self, filename=f"{script_dir}/in/instances.json", **kwargs):
