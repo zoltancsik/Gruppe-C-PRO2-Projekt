@@ -7,6 +7,7 @@ from clemgame.clemgame import (DialogueGameMaster,
                                GameScorer,
                                GameMaster)
 from games.rhyme_battle.players import Guesser
+from games.rhyme_battle.linguistic_tools import RhymeValidator
 
 GAME_NAME = "rhyme_battle"
 WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
@@ -26,6 +27,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.complete_turns: int = 0
         self.words_list = []
         self.history_list = []
+        self.rhyme_validator = None
 
     def setup(self, init_prompt_a, init_prompt_b,
               n_turns, difficulty, game_id, starting_word,
@@ -42,7 +44,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         # Game Metrics
         self.n_turns = n_turns
         self.starting_word = starting_word
-        self.current_word = None
+        self.last_word = starting_word
         self.game_id = game_id
         self.current_turn = 0
 
@@ -59,7 +61,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             })
         self.log_key('n_turns', n_turns)
         self.log_key('starting_word', self.starting_word)
-        self.log_key('current_word', self.current_word)
         self.log_next_turn()
 
         # Appending prompts to player.history
@@ -95,22 +96,24 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         if not self._parse_answer(answer_a, self.player_a):
             pass
         else:
-            self.distribute_points('a', 0.5)
-            self._update_history(answer_a, self.player_a, 'assistant')
-            self._update_history(answer_a, self.player_b, 'user')
+            self.player_a.distribute_points(0.5)
             action = {'type': 'send message', 'content': answer_a}
             self.log_event(from_='GM', to='Player 2', action=action)
+
+        self._update_history(answer_a, self.player_a, 'assistant')
+        self._update_history(answer_a, self.player_b, 'user')
 
         # PLAYER B
         answer_b = self._get_answer('b')
         if not self._parse_answer(answer_b, self.player_b):
             pass
         else:
-            self.distribute_points('b', 0.5)
-            self._update_history(answer_b, self.player_b, 'assistant')
-            self._update_history(answer_b, self.player_a, 'user')
+            self.player_b.distribute_points(1)
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
+
+        self._update_history(answer_b, self.player_b, 'assistant')
+        self._update_history(answer_b, self.player_a, 'user')
 
         self.current_turn += 1
         self.log_next_turn()
@@ -145,11 +148,10 @@ class RhymeBattleGameMaster(DialogueGameMaster):
     def _update_history(self, info, player_obj, role):
         player_obj.history.append(
             {
-                'player': player_obj.name,
                 'role': role,
                 'content': info,
                 'turn': self.current_turn,
-                'points': player_obj.points,
+                'points_so_far': player_obj.points,
                 'words_so_far': self.words_list
             })
 
@@ -164,47 +166,28 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             if self._validate_answer(word, player):
                 return True
             else:
-                print("GAME_RULE violated, skipping turn")
+                print("GAME_RULE violated")
                 return False
         else:
-            msg = "Incorrect. Answer has to be in the format MY GUESS: word"
-            if player.name == 'Player A':
-                self._update_history(msg, self.player_a, 'assistant')
-                self._update_history(msg, self.player_b, 'user')
-            else:
-                self._update_history(msg, self.player_b, 'assistant')
-                self._update_history(msg, self.player_a, 'user')
-
-            print("MOVE_RULE Violated, skipping turn")
+            print("MOVE_RULE Violated")
             return False
 
     def _validate_answer(self, word, player):
         # GAME RULES
         if word not in self.words_list:
             self.words_list.append(word)
-            return True
-        else:
-            msg = f"Incorrect guess, {word} was used already, skipping turn"
-            if player.name == 'Player A':
-                self._update_history(msg, self.player_a, 'assistant')
-                self._update_history(msg, self.player_b, 'user')
+            rhyme_validator = RhymeValidator(word, self.last_word)
+            rhyme_score = rhyme_validator.validate_guess()
+            if rhyme_score >= 1:
+                player.distribute_points(1)
+                print(f"Score: {rhyme_score}")
+                self.last_word = word
+                return True
             else:
-                self._update_history(msg, self.player_b, 'assistant')
-                self._update_history(msg, self.player_a, 'user')
-
+                print("DOES NOT RHYME")
+                return False
+        else:
             return False
-
-    def get_points(self, player):
-        if player == 'a':
-            return self.player_a.points
-        else:
-            return self.player_b.points
-
-    def distribute_points(self, player, points):
-        if player == 'a':
-            self.player_a.points += points
-        else:
-            self.player_b.points += points
 
     def log_eval_assets(self) -> None:
         self.log_key('Played turns', self.current_turn)
@@ -222,8 +205,7 @@ class RhymeBattleGameBenchmark(GameBenchmark):
 
     def get_description(self):
         # This shows up when scripts/cli.py ls
-        return ("Players must find phonetically similar words, "
-                "that have different meanings.")
+        return ("Players must continously come up with rhyming words.")
 
     def create_game_master(self,
                            experiment: Dict,
