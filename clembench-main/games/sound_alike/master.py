@@ -116,8 +116,12 @@ class SoundAlikeGameMaster(DialogueGameMaster):
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
 
-        self._update_history(f"Round: {self.current_turn} | Words so far: {self.words_list} | Points Player A: {self.player_a.points}", "a", "system")
-        self._update_history(f"Round: {self.current_turn} | Words so far: {self.words_list} | Points Player B: {self.player_b.points}", "b", "system")
+        turn_end_info = (f"Round: {self.current_turn}"
+                         f" | Words so far: {self.words_list}"
+                         f" | Points Player A: {self.player_a.points}"
+                         f" | Points Player B: {self.player_b.points}")
+        self._update_history(turn_end_info, 'a', "system")
+        self._update_history(turn_end_info, 'b', "system")
 
         self.current_turn += 1
 
@@ -133,15 +137,12 @@ class SoundAlikeGameMaster(DialogueGameMaster):
                            call=(copy.deepcopy(prompt), raw_answer))
             self._update_history(answer, 'a', 'assistant')
 
-            # print("\n")
-            # print(prompt)
-            # print("\n")
-
             # FIXME: Build Interface for readability
             print("\n")
             print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
                   f" LVL: {self.difficulty} | "
-                  f"POINTS: A:{self.player_a.points}|B:{self.player_b.points} Out of {self.points_needed}]===")
+                  f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
+                  f"/{self.points_needed}]===")
             print(f"A - {self.player_a.model}: {answer}")
 
         else:
