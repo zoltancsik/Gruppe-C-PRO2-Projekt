@@ -25,6 +25,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.lose: bool = False
         self.complete_turns: int = 0
         self.words_list = []
+        self.history_list = []
 
     def setup(self, init_prompt_a, init_prompt_b,
               n_turns, difficulty, game_id, starting_word,
@@ -32,8 +33,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         # Setting up Players and Prompts
         self.player_a = Guesser(self.model_a, 'Player A', 0)
         self.player_b = Guesser(self.model_b, 'Player B', 0)
-        self.init_prompt_a = init_prompt_a
-        self.init_prompt_b = init_prompt_b
         self.difficulty = difficulty
         self.words_list.append(starting_word)
         self.points_needed = points_needed
@@ -64,78 +63,67 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.log_next_turn()
 
         # Appending prompts to player.history
-        self.player_a.history.append(
-            {'role': 'system', 'content': self.init_prompt_a})
-        self.player_b.history.append(
-            {'role': 'system', 'content': self.init_prompt_b})
-        action = {'type': 'send message', 'content': self.init_prompt_a}
+        self._update_history(init_prompt_a, self.player_a, 'system')
+        self._update_history(init_prompt_b, self.player_b, 'system')
+
+        action = {'type': 'send message', 'content': init_prompt_a}
         self.log_event(from_='GM', to='Player 1', action=action)
-        action = {'type': 'send message', 'content': self.init_prompt_b}
+        action = {'type': 'send message', 'content': init_prompt_b}
         self.log_event(from_='GM', to='Player 2', action=action)
 
     def play(self) -> None:
-        while self.continue_round():
-            # Main Loop
-            self.complete_turns += 1
-            self.log_next_turn()
-            self.conduct_turn()
+        while self.turn():
+            if self.player_a.points >= self.points_needed or \
+               self.player_b.points >= self.points_needed:
+                print("Player A Won")
+                break
+            elif self.current_turn >= self.n_turns:
+                print("Maximum Turn Count reached")
+                break
 
-        if self.points >= self.points_needed:
-            action = {'type': 'info', 'content': 'game successful'}
-            self.log_event(from_='GM', to='GM', action=action)
-
+        print("====================[GAME OVER]====================")
+        print(f"POINTS: A:{self.player_a.points} B: "
+              f"{self.player_b.points}/{self.points_needed} "
+              f"ROUNDS: {self.current_turn}/{self.n_turns}")
         action = {'type': 'info', 'content': 'end game'}
         self.log_event(from_='GM', to='GM', action=action)
         self.log_eval_assets()
 
-    def conduct_turn(self):
+    def turn(self):
         # PLAYER A
         answer_a = self._get_answer('a')
-        # MOVE_RULE VIOLATED
-        if not self._parse_answer(answer_a, 'a'):
-            self._update_history(f"{answer_a} was invalid", 'b', 'user')
-
+        if not self._parse_answer(answer_a, self.player_a):
+            pass
         else:
-            # Logging A's answer to B's History
             self.distribute_points('a', 0.5)
-
-            self._update_history(answer_a, 'b', 'user')
+            self._update_history(answer_a, self.player_a, 'assistant')
+            self._update_history(answer_a, self.player_b, 'user')
             action = {'type': 'send message', 'content': answer_a}
             self.log_event(from_='GM', to='Player 2', action=action)
 
+        # PLAYER B
         answer_b = self._get_answer('b')
-        # MOVE RULE VIOLATED
-        if not self._parse_answer(answer_b, 'b'):
-            self._update_history(f"{answer_b} was invalid", 'a', 'user')
-
+        if not self._parse_answer(answer_b, self.player_b):
+            pass
         else:
-            # Logging B's answer to A's History
             self.distribute_points('b', 0.5)
-
-            self._update_history(answer_b, 'a', 'user')
+            self._update_history(answer_b, self.player_b, 'assistant')
+            self._update_history(answer_b, self.player_a, 'user')
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
 
-        turn_end_info = (f"Round: {self.current_turn}"
-                         f" | Words so far: {self.words_list}"
-                         f" | Points Player A: {self.player_a.points}"
-                         f" | Points Player B: {self.player_b.points}")
-        self._update_history(turn_end_info, 'a', "system")
-        self._update_history(turn_end_info, 'b', "system")
-
         self.current_turn += 1
+        self.log_next_turn()
+        return True
 
     def _get_answer(self, player):
         assert player in ('a', 'b')
         if player == 'a':
-            # The Player's History is turned into a prompt
-            # With the Player classes __call__ method.
-            # self.player_a.history.append(f"Words so far {self.words_list}")
             prompt, raw_answer, answer = self.player_a(self.player_a.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
+
             self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
-            self._update_history(answer, 'a', 'assistant')
 
             # FIXME: Build Interface for readability
             print("\n")
@@ -150,21 +138,23 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
-            self._update_history(answer, 'b', 'assistant')
             print(f"B - {self.player_b.model}: {answer}")
 
         return answer
 
-    def _update_history(self, info, player, role):
-        assert player in ('a', 'b')
-        if player == 'a':
-            self.player_a.history.append({'role': role, 'content': info})
-            with open('history_player_a.json', 'w', encoding='utf-8') as fle:
-                json.dump(self.player_a.history, fle, indent=4, ensure_ascii=False)
-        else:
-            self.player_b.history.append({'role': role, 'content': info})
-            with open('history_player_b.json', 'w', encoding='utf-8') as fle:
-                json.dump(self.player_b.history, fle, indent=4, ensure_ascii=False)
+    def _update_history(self, info, player_obj, role):
+        player_obj.history.append(
+            {
+                'player': player_obj.name,
+                'role': role,
+                'content': info,
+                'turn': self.current_turn,
+                'points': player_obj.points,
+                'words_so_far': self.words_list
+            })
+
+        with open(f'history_{player_obj.name}.json', 'w', encoding='utf-8') as fle:
+            json.dump(player_obj.history, fle, indent=4, ensure_ascii=False)
 
     def _parse_answer(self, answer, player):
         # MOVE_RULE: Answer has to include MY GUESS: word
@@ -174,18 +164,34 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             if self._validate_answer(word, player):
                 return True
             else:
-                print("GAME_RULE violated")
+                print("GAME_RULE violated, skipping turn")
                 return False
         else:
-            print("MOVE_RULE Violated, input bad format")  # FIXME: Remove
+            msg = "Incorrect. Answer has to be in the format MY GUESS: word"
+            if player.name == 'Player A':
+                self._update_history(msg, self.player_a, 'assistant')
+                self._update_history(msg, self.player_b, 'user')
+            else:
+                self._update_history(msg, self.player_b, 'assistant')
+                self._update_history(msg, self.player_a, 'user')
+
+            print("MOVE_RULE Violated, skipping turn")
             return False
 
     def _validate_answer(self, word, player):
         # GAME RULES
         if word not in self.words_list:
+            self.words_list.append(word)
             return True
         else:
-            print(f"Player {player}: {word} was already used")
+            msg = f"Incorrect guess, {word} was used already, skipping turn"
+            if player.name == 'Player A':
+                self._update_history(msg, self.player_a, 'assistant')
+                self._update_history(msg, self.player_b, 'user')
+            else:
+                self._update_history(msg, self.player_b, 'assistant')
+                self._update_history(msg, self.player_a, 'user')
+
             return False
 
     def get_points(self, player):
@@ -199,16 +205,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             self.player_a.points += points
         else:
             self.player_b.points += points
-
-    def continue_round(self):
-        points_a = self.player_a.points
-        points_b = self.player_b.points
-        if (points_a or points_b) < self.points_needed:
-            return True
-        else:
-            print("====================[GAME OVER]====================")
-            print(f"POINTS: A:{points_a} B: {points_b}/{self.points_needed} "
-                  f"ROUNDS: {self.current_turn}/{self.n_turns}")
 
     def log_eval_assets(self) -> None:
         self.log_key('Played turns', self.current_turn)
