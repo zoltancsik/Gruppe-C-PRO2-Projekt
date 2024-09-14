@@ -92,36 +92,27 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
     def turn(self):
         # PLAYER A
-        answer_a = self._get_answer('a')
+        answer_a = self._get_answer(self.player_a)
         if not self._parse_answer(answer_a, self.player_a):
             pass
         else:
-            self.player_a.distribute_points(0.5)
             action = {'type': 'send message', 'content': answer_a}
             self.log_event(from_='GM', to='Player 2', action=action)
 
-        self._update_history(answer_a, self.player_a, 'assistant')
-        self._update_history(answer_a, self.player_b, 'user')
-
         # PLAYER B
-        answer_b = self._get_answer('b')
+        answer_b = self._get_answer(self.player_b)
         if not self._parse_answer(answer_b, self.player_b):
             pass
         else:
-            self.player_b.distribute_points(1)
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
-
-        self._update_history(answer_b, self.player_b, 'assistant')
-        self._update_history(answer_b, self.player_a, 'user')
 
         self.current_turn += 1
         self.log_next_turn()
         return True
 
     def _get_answer(self, player):
-        assert player in ('a', 'b')
-        if player == 'a':
+        if player.name == self.player_a.name:
             prompt, raw_answer, answer = self.player_a(self.player_a.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
 
@@ -151,42 +142,75 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 'role': role,
                 'content': info,
                 'turn': self.current_turn,
-                'points_so_far': player_obj.points,
-                'words_so_far': self.words_list
+                'points_so_far': player_obj.points
+                # 'words_so_far': self.words_list
             })
 
         with open(f'history_{player_obj.name}.json', 'w', encoding='utf-8') as fle:
             json.dump(player_obj.history, fle, indent=4, ensure_ascii=False)
 
     def _parse_answer(self, answer, player):
-        # MOVE_RULE: Answer has to include MY GUESS: word
         match = re.search(r'MY GUESS: (\w+)', answer)
         if match:
             word = match.group(1)
             if self._validate_answer(word, player):
-                return True
+                # Send Player's guess to player's history as assistant
+                self._update_history(answer, player, 'assistant')
+                # Send Player's guess to other players' history as user
+                self._update_history(
+                    answer,
+                    self.player_b if player.name == "Player A"
+                    else self.player_a, 'user')
+                self.last_word = word
             else:
-                print("GAME_RULE violated")
+                # GAME RULE violated
                 return False
         else:
+            # MOVE_RULE violated
             print("MOVE_RULE Violated")
             return False
 
     def _validate_answer(self, word, player):
         # GAME RULES
         if word not in self.words_list:
-            self.words_list.append(word)
+            if word not in WILD_CARDS and word != "CHEATER":
+                self.words_list.append(word)
+            elif word in WILD_CARDS and player.name == "Player A":
+                if self.trick_attempt == 0:
+                    self.trick_attempt = 1  # Player A tries to trick Player B
+                    player.distribute_points(0.5)
+                    return True
+            elif word == "CHEATER" and player.name == "Player B":
+                if self.trick_attempt == 1:
+                    self.trick_attempt = 0
+                    player.distribute_points(1)
+                    self._update_history(f"You were caught you cheating, the game goes on with {self.last_word}", self.player_a, "system")
+                    return True
+                else:
+                    self._update_history(f"You called the other player out for cheating, but he was not. Game continues with {self.last_word}", player, "system")
+                    self._update_history(f"Last turn, the other palyer falsely accused you of cheating, game continues with {self.last_word}", self.player_a, "system")
+                    player.distribute_points(-0.5)
+                    return False
+
             rhyme_validator = RhymeValidator(word, self.last_word)
             rhyme_score = rhyme_validator.validate_guess()
-            if rhyme_score >= 1:
+            if rhyme_score >= 0:
                 player.distribute_points(1)
-                print(f"Score: {rhyme_score}")
-                self.last_word = word
+                print(f"Score: {rhyme_score}")  # Very good Guess
+                print(f"Current Last Word: {self.last_word}")
                 return True
-            else:
-                print("DOES NOT RHYME")
-                return False
+                # FIXME: Add else condition here, but refine rhyming check first
         else:
+            print("World was already used")
+            print(f"Player: {player}")
+            player.distribute_points(-0.5)
+            self._update_history(f"Last turn, you falsely guessed {word}, which was already used, please provide a new one that rhymes with {self.last_word}"
+                                 f" Words used so far: {self.words_list}", player, "system")
+            self._update_history(
+                    f"I guessed wrong, game continues with {self.words_list[-1]} | Words we used so far {self.words_list}",
+                    self.player_b if player.name == "Player A"
+                    else self.player_a, 'user')
+            self.last_word = word
             return False
 
     def log_eval_assets(self) -> None:

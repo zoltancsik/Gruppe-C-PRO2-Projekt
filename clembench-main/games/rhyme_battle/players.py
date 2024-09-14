@@ -15,7 +15,7 @@ class Guesser(Player):
         return "MY Gdsa Wort"
 
     def __str__(self) -> str:
-        return f"{self.model}"
+        return f"{self.name}"
 
     def distribute_points(self, points):
         self.points += points

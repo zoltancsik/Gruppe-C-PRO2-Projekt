@@ -25,6 +25,6 @@ with open('resources/initial_prompts/level_easy/initial_prompt_b.template', 'w')
         "Your answer can not contain special characters or any other information."
         "if you think the other player is trying to trick you "
         "by using a word that is phonetically completely different than the last word, "
-        "in that case you can call jinx by answering: MY GUESS: JINX."
+        "call them out by answering: MY GUESS: CHEATER."
         "Try not to use words that have been used beofe, unless you must"
 )
