@@ -34,6 +34,353 @@
     {
         "word": "Robot",
         "num_syllables": 2
+    },
+    {
+        "word": "Window",
+        "num_syllables": 2
+    },
+    {
+        "word": "Mountain",
+        "num_syllables": 2
+    },
+    {
+        "word": "Guitar",
+        "num_syllables": 2
+    },
+    {
+        "word": "Table",
+        "num_syllables": 2
+    },
+    {
+        "word": "Picture",
+        "num_syllables": 2
+    },
+    {
+        "word": "Kitchen",
+        "num_syllables": 2
+    },
+    {
+        "word": "Puzzle",
+        "num_syllables": 2
+    },
+    {
+        "word": "Orange",
+        "num_syllables": 2
+    },
+    {
+        "word": "Bubble",
+        "num_syllables": 2
+    },
+    {
+        "word": "Rocket",
+        "num_syllables": 2
+    },
+    {
+        "word": "Bottle",
+        "num_syllables": 2
+    },
+    {
+        "word": "Thunder",
+        "num_syllables": 2
+    },
+    {
+        "word": "Paper",
+        "num_syllables": 2
+    },
+    {
+        "word": "Flowerpot",
+        "num_syllables": 3
+    },
+    {
+        "word": "Television",
+        "num_syllables": 4
+    },
+    {
+        "word": "Computer",
+        "num_syllables": 3
+    },
+    {
+        "word": "Helicopter",
+        "num_syllables": 4
+    },
+    {
+        "word": "Calculator",
+        "num_syllables": 4
+    },
+    {
+        "word": "Umbrella",
+        "num_syllables": 3
+    },
+    {
+        "word": "Elephant",
+        "num_syllables": 3
+    },
+    {
+        "word": "Strawberry",
+        "num_syllables": 3
+    },
+    {
+        "word": "Telephone",
+        "num_syllables": 3
+    },
+    {
+        "word": "Chocolate",
+        "num_syllables": 3
+    },
+    {
+        "word": "Banana",
+        "num_syllables": 3
+    },
+    {
+        "word": "Avocado",
+        "num_syllables": 4
+    },
+    {
+        "word": "Crocodile",
+        "num_syllables": 3
+    },
+    {
+        "word": "Butterfly",
+        "num_syllables": 3
+    },
+    {
+        "word": "Supermarket",
+        "num_syllables": 4
+    },
+    {
+        "word": "Microscope",
+        "num_syllables": 3
+    },
+    {
+        "word": "Motorcycle",
+        "num_syllables": 4
+    },
+    {
+        "word": "Electricity",
+        "num_syllables": 4
+    },
+    {
+        "word": "University",
+        "num_syllables": 4
+    },
+    {
+        "word": "Volcano",
+        "num_syllables": 3
+    },
+    {
+        "word": "Refrigerator",
+        "num_syllables": 5
+    },
+    {
+        "word": "Ambulance",
+        "num_syllables": 3
+    },
+    {
+        "word": "Parachute",
+        "num_syllables": 3
+    },
+    {
+        "word": "Excavator",
+        "num_syllables": 4
+    },
+    {
+        "word": "Microwave",
+        "num_syllables": 3
+    },
+    {
+        "word": "Bicycle",
+        "num_syllables": 3
+    },
+    {
+        "word": "Trampoline",
+        "num_syllables": 3
+    },
+    {
+        "word": "Kangaroo",
+        "num_syllables": 3
+    },
+    {
+        "word": "Photography",
+        "num_syllables": 4
+    },
+    {
+        "word": "Laboratory",
+        "num_syllables": 4
+    },
+    {
+        "word": "Alligator",
+        "num_syllables": 4
+    },
+    {
+        "word": "Circus",
+        "num_syllables": 2
+    },
+    {
+        "word": "Furniture",
+        "num_syllables": 3
+    },
+    {
+        "word": "Compass",
+        "num_syllables": 2
+    },
+    {
+        "word": "Baseball",
+        "num_syllables": 2
+    },
+    {
+        "word": "Lighthouse",
+        "num_syllables": 2
+    },
+    {
+        "word": "Snowflake",
+        "num_syllables": 2
+    },
+    {
+        "word": "Dragonfly",
+        "num_syllables": 3
+    },
+    {
+        "word": "Rainbow",
+        "num_syllables": 2
+    },
+    {
+        "word": "Motorboat",
+        "num_syllables": 3
+    },
+    {
+        "word": "Whirlpool",
+        "num_syllables": 2
+    },
+    {
+        "word": "Harmonica",
+        "num_syllables": 4
+    },
+    {
+        "word": "Telescope",
+        "num_syllables": 3
+    },
+    {
+        "word": "Compass",
+        "num_syllables": 2
+    },
+    {
+        "word": "Saxophone",
+        "num_syllables": 3
+    },
+    {
+        "word": "Keyboard",
+        "num_syllables": 2
+    },
+    {
+        "word": "Satellite",
+        "num_syllables": 3
+    },
+    {
+        "word": "Notebook",
+        "num_syllables": 2
+    },
+    {
+        "word": "Typewriter",
+        "num_syllables": 3
+    },
+    {
+        "word": "Blackboard",
+        "num_syllables": 2
+    },
+    {
+        "word": "Classroom",
+        "num_syllables": 2
+    },
+    {
+        "word": "Playground",
+        "num_syllables": 2
+    },
+    {
+        "word": "Stethoscope",
+        "num_syllables": 3
+    },
+    {
+        "word": "Calculator",
+        "num_syllables": 4
+    },
+    {
+        "word": "Philosopher",
+        "num_syllables": 4
+    },
+    {
+        "word": "Dictionary",
+        "num_syllables": 4
+    },
+    {
+        "word": "Artist",
+        "num_syllables": 2
+    },
+    {
+        "word": "Scientist",
+        "num_syllables": 3
+    },
+    {
+        "word": "Journalist",
+        "num_syllables": 3
+    },
+    {
+        "word": "Electrician",
+        "num_syllables": 4
+    },
+    {
+        "word": "Composer",
+        "num_syllables": 3
+    },
+    {
+        "word": "Architect",
+        "num_syllables": 3
+    },
+    {
+        "word": "Detective",
+        "num_syllables": 3
+    },
+    {
+        "word": "Engineer",
+        "num_syllables": 3
+    },
+    {
+        "word": "Painter",
+        "num_syllables": 2
+    },
+    {
+        "word": "Librarian",
+        "num_syllables": 4
+    },
+    {
+        "word": "Firefighter",
+        "num_syllables": 4
+    },
+    {
+        "word": "Gardener",
+        "num_syllables": 3
+    },
+    {
+        "word": "Photographer",
+        "num_syllables": 4
+    },
+    {
+        "word": "Astronomer",
+        "num_syllables": 4
+    },
+    {
+        "word": "Physician",
+        "num_syllables": 3
+    },
+    {
+        "word": "Professor",
+        "num_syllables": 3
+    },
+    {
+        "word": "Lawyer",
+        "num_syllables": 2
+    },
+    {
+        "word": "Magician",
+        "num_syllables": 3
     }
-
 ]
