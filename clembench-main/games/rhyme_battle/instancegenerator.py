@@ -4,7 +4,7 @@ import string
 import os
 from clemgame.clemgame import GameInstanceGenerator
 
-LEVELS = ['EASY']
+LEVELS = ['EASY', 'HARD', 'CO-OP']
 GAME_NAME = 'rhyme_battle'
 N_INSTANCES = 2
 N_EPISODES = 1
@@ -50,7 +50,8 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
         prompt_a, prompt_b = (
             self.load_template
             (
-                f'{script_dir}/resources/initial_prompts/{folder}/initial_prompt_{x}'
+                f"{script_dir}/resources/initial_prompts/"
+                f"{folder}/initial_prompt_{x}"
             )
             for x in ['a', 'b'])
 
@@ -73,16 +74,17 @@ class RhymeBattleInstanceGenerator(GameInstanceGenerator):
             json.dump(self.instances, json_file, indent=4, ensure_ascii=False)
 
     def pick_starting_word(self, difficulty):
-        with open(f"{script_dir}/resources/starting_words/starting_words_pool.json", 'r') as file:
+        with open(
+            f"{script_dir}/resources/starting_words/"
+                f"starting_words_pool.json", 'r') as file:
             word_pool = json.load(file)
 
-        # Define syllable counts based on difficulty level
         if difficulty == "EASY":
             syllables = 2
         elif difficulty == "HARD":
-            syllables = 2  # FIXME: Adjust
+            syllables = 3
         elif difficulty == "CO-OP":
-            syllables = 2  # FIXME: Adjust
+            syllables = 4
         else:
             raise ValueError(f"Unknown difficulty level: {difficulty}")
 
