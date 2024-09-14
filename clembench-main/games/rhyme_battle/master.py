@@ -161,6 +161,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                     answer,
                     self.player_b if player.name == "Player A"
                     else self.player_a, 'user')
+                return True
             else:
                 # GAME RULE violated
                 return False
@@ -179,7 +180,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                     self.trick_attempt = 1  # Player A tries to trick Player B
                     player.distribute_points(0.5)
                     return True
-            elif word == "CHEATER" and player.name == "Player B":
+            elif word.lower() == "cheater" and player.name == "Player B":
                 if self.trick_attempt == 1:
                     self.trick_attempt = 0
                     player.distribute_points(1)
@@ -193,12 +194,23 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                     return False
 
             rhyme_validator = RhymeValidator(word, self.last_word)
-            rhyme_score = rhyme_validator.validate_guess()
-            if rhyme_score >= 0:
-                player.distribute_points(1)
-                self.last_word = word
+            r_score = rhyme_validator.make_final_judgement()
+            if r_score == 1:
+                player.distribute_points(2)
                 return True
-                # FIXME: Add else condition here, but refine rhyming check first
+            elif r_score == 2:
+                player.distribute_points(1)
+                return True
+            elif r_score == 3:
+                player.distribute_points(0.5)
+                return True
+            else:
+                player.distribute_points(-0.5)
+                self._update_history(f"My guess {word} does not rhyme with {self.last_word}", player, 'assistant')
+                self._update_history(f"My guess {word} does not rhyme with {self.last_word}",
+                                     self.player_b if player.name == "Player A"
+                                     else self.player_a, 'user')
+                return False
         else:
             player.distribute_points(-0.5)
             self._update_history(
