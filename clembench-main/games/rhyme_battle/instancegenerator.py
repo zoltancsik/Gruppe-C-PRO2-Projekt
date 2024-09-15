@@ -6,8 +6,8 @@ from clemgame.clemgame import GameInstanceGenerator
 
 LEVELS = ['EASY', 'HARD', 'CO-OP']
 GAME_NAME = 'rhyme_battle'
-N_INSTANCES = 3
-N_EPISODES = 2
+N_INSTANCES = 4
+N_EPISODES = 3
 WILD_CARDS = ["Appreciation", "Inauguration", "Consideration"]
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
