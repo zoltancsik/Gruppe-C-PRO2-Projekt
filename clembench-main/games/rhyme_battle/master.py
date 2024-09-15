@@ -107,6 +107,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
 
+        print("\n")
         self.current_turn += 1
         self.log_next_turn()
         return True
@@ -119,22 +120,20 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             self.log_event(from_='Player A', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
 
-            # if self.difficulty == "EASY":
-            #     # FIXME: Build Interface for readability
-            #     print("\n")
-            #     print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
-            #           f" LVL: {self.difficulty} | "
-            #           f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
-            #           f"/{self.points_needed}]===")
-            #     print(f"A - {self.player_a.model}: {answer}")
-            # elif self.difficulty == "HARD":
+            # FIXME: Build Interface for readability
+            print("\n")
+            print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
+                  f" LVL: {self.difficulty} | "
+                  f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
+                  f"/{self.points_needed}]===")
+            print(f"A - {self.player_a.model}: {answer}")
 
         else:
             prompt, raw_answer, answer = self.player_b(self.player_b.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
-            # print(f"B - {self.player_b.model}: {answer}")
+            print(f"B - {self.player_b.model}: {answer}")
 
         return answer
 
@@ -145,7 +144,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 'content': info,
                 'turn': self.current_turn,
                 'points_so_far': player_obj.points
-                # 'words_so_far': self.words_list
             })
 
         with open(f'history_{player_obj.name}.json', 'w', encoding='utf-8') as fle:
@@ -178,10 +176,32 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             word = re.search(pattern, answer)
             if word:
                 # MOVE_RULE Passed
-                print(word.group())
+                if self._validate_hard_answer(answer, word.group(), player):
+                    return True
+                else:
+                    # GAME_RULE violated
+                    return False
             else:
-                # MOVE_RULE Failed
+                # MOVE_RULE violated
                 return False
+
+    def _validate_hard_answer(self, answer, word, player):
+        rhyme_validator = RhymeValidator(word, self.last_word)
+        r_score = rhyme_validator.make_final_judgement()
+        if r_score == 0:
+            self._update_history(f"Guess invalid, continue with {self.last_word}", player, 'assistant')
+            self._update_history(f"Guess invalid, continue with {self.last_word}", self.player_b if player.name == "Player A" else self.player_a, 'user')
+            player.distribute_points(-0.5)
+            return False
+        else:
+            final_points = 2 if r_score == 1 else 1 if r_score == 2 else 0.5
+            print(f"Final Points: {final_points} | Rscore: {r_score}")
+            player.distribute_points(final_points)
+
+        self.last_word = word
+        self._update_history(answer, player, 'assistant')
+        self._update_history(answer, self.player_b if player.name == "Player A" else self.player_a, 'user')
+        return True
 
     def _validate_answer(self, word, player):
         # GAME RULES
@@ -208,15 +228,10 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
             rhyme_validator = RhymeValidator(word, self.last_word)
             r_score = rhyme_validator.make_final_judgement()
-            if r_score == 1:
-                player.distribute_points(2)
-                return True
-            elif r_score == 2:
-                player.distribute_points(1)
-                return True
-            elif r_score == 3:
-                player.distribute_points(0.5)
-                return True
+            if r_score >= 1:
+                final_points = 2 if r_score == 1 \
+                      else 1 if r_score == 2 else 0.5
+                player.distribute_points(final_points)
             else:
                 player.distribute_points(-0.5)
                 self._update_history(f"My guess {word} does not rhyme with {self.last_word}", player, 'assistant')
