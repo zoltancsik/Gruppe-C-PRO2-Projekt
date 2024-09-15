@@ -157,11 +157,11 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         if self.scorer:
             self.scorer.compute_scores(episode_interactions)
 
-        # FIXME: REMOVE
-        print("====================[GAME OVER]====================")
-        print(f"POINTS: A:{self.player_a.points} B: "
-              f"{self.player_b.points}/{self.points_needed} "
-              f"ROUNDS: {self.current_turn}/{self.n_turns}")
+        # Disable tqdm in clemgame.py before using this
+        # print("====================[GAME OVER]====================")
+        # print(f"POINTS: A:{self.player_a.points} B: "
+        #       f"{self.player_b.points}/{self.points_needed} "
+        #       f"ROUNDS: {self.current_turn}/{self.n_turns}")
 
         self.log_event(from_='GM',
                        to='GM',
@@ -216,13 +216,14 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                            to='GM',
                            action={'type': 'get message', 'content': answer},
                            call=(copy.deepcopy(prompt), raw_answer))
-            # FIXME: REMOVE
-            print("\n")
-            print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
-                  f" LVL: {self.difficulty} | "
-                  f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
-                  f"/{self.points_needed}]===")
-            print(f"A - {self.player_a.model}: {answer}")
+
+            # Disable tqdm in clemgamge.py before using this
+            # print("\n")
+            # print(f"===[ TURN: {self.current_turn}/{self.n_turns} |"
+            #       f" LVL: {self.difficulty} | "
+            #       f"POINTS: A:{self.player_a.points}|B:{self.player_b.points}"
+            #       f"/{self.points_needed}]===")
+            # print(f"A - {self.player_a.model}: {answer}")
         else:
             # APPEND HISTORY TO PROMPT THROUGH __call__ METHOD
             prompt, raw_answer, answer = self.player_b(
@@ -233,7 +234,8 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                            to='GM',
                            action={'type': 'get message', 'content': answer},
                            call=(copy.deepcopy(prompt), raw_answer))
-            print(f"B - {self.player_b.model}: {answer}")  # FIXME: REMOVE
+            # Disable tqdm in clemgame.py before using this
+            # print(f"B - {self.player_b.model}: {answer}")
 
         if not answer:
             # REQUEST FAIL
