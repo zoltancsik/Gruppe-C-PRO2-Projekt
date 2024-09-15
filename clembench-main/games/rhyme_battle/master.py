@@ -74,13 +74,19 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
     def play(self) -> None:
         while self.turn():
-            if self.player_a.points >= self.points_needed or \
-               self.player_b.points >= self.points_needed:
-                print("Player A Won")
-                break
-            elif self.current_turn >= self.n_turns:
-                print("Maximum Turn Count reached")
-                break
+            if self.difficulty == "CO-OP":
+                if self.player_a.get_points() + \
+                   self.player_b.get_points() >= self.points_needed:
+                    print("Game finished")
+                    break
+            else:
+                if self.player_a.points >= self.points_needed or \
+                   self.player_b.points >= self.points_needed:
+                    print("Player A Won")
+                    break
+                elif self.current_turn >= self.n_turns:
+                    print("Maximum Turn Count reached")
+                    break
 
         print("====================[GAME OVER]====================")
         print(f"POINTS: A:{self.player_a.points} B: "
@@ -196,7 +202,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
     def _validate_coop_answer(self, answer, player):
         rhyme_validator = RhymeValidator(answer, self.starting_word)
         r_score = rhyme_validator.make_final_judgement()
-        print(f"Rscore: {r_score}")
         reason = ""
         if r_score == 0:
             reason = (f"Guess invalid, {answer}"
