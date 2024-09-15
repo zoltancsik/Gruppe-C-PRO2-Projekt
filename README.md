@@ -1,14 +1,28 @@
-# Gruppe-C-PRO2-Projekt A - Game
-* Evaluating the Performance of Large Language Models with the Clembench Framework *
+# Rhyme Battle
+This repository contains the Rhyme Battle game, which we integrated into the ClemBench Framework as our submission for the **Programmierung II** final project. The game challenges players with phonetic wordplay in both cooperative and competitive modes.
 
-# Setup
-1. In order to run the framework, you have to create a virtual environment
+### About the Repository
+The [Workflow Documentation](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/tree/main/workflow_documentation) folder provides an extensive insight into our work process, by including the following:
+- [ClemGame UML Diagram](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/blob/main/workflow_documentation/clem_game_uml.pdf)
+- [Implementation Roadmap](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/blob/main/workflow_documentation/implementation_roadmap.pdf)
+- [Version Control Architecture](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/blob/main/workflow_documentation/git_structure.pdf)
+
+### Setting up the Clembench Framework
+To run our game within the ClemBench framework, follow the instructions provided in [the original ClemBench repository](https://github.com/clp-research/clembench) for setting up the environment and running the framework.
+
+### Game-Specific Setup
+1. Clone the repository and navigate to the **rhyme_battle** game directory:
 ```bash
-python -m venv /path/to/new/virtual/environment
+cd /path/to/clembench-main/games/rhyme_battle
 ```
-2. Activate your virtual environment
+2. Install the required dependencies, using:
 ```bash
-source venv/bin/activate
+pip install -r requirements.txt
+```
+3. Run the game with the following command:
+```bash
+python3 scripts/cli.py run -g rhyme_battle -m model_of_your_choice
 ```
 
-3. Use [this guide](https://github.com/clp-research/clembench/blob/main/docs/howto_run_benchmark.md) to run the benchmark locally
+### Game Details
+You can find a more detailed description of the game in the README file located within the [game's folder](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/tree/main/clembench-main/games/rhyme_battle).

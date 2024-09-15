@@ -1,28 +1,36 @@
-# Rhyme Battle
-This repository contains the Rhyme Battle game, which we integrated into the ClemBench Framework as our submission for the **Programmierung II** final project. The game challenges players with phonetic wordplay in both cooperative and competitive modes.
+# Rhyme Battle - README
 
-### About the Repository
-The [Workflow Documentation](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/tree/main/workflow_documentation) folder provides an extensive insight into our work process, by including the following:
-- [ClemGame UML Diagram](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/blob/main/workflow_documentation/clem_game_uml.pdf)
-- [Implementation Roadmap](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/blob/main/workflow_documentation/implementation_roadmap.pdf)
-- [Version Control Architecture](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/blob/main/workflow_documentation/git_structure.pdf)
+## Overview
 
-### Setting up the Clembench Framework
-To run our game within the ClemBench framework, follow the instructions provided in [the original ClemBench repository](https://github.com/clp-research/clembench) for setting up the environment and running the framework.
+This folder contains the game **Rhyme Battle**, designed to work within the ClemBench Framework. The game is a rhyming challenge where two players, Player A and Player B, take turns coming up with rhyming words based on the game's difficulty. Players win by accumulating enough points or lose if they exceed the number of allowed turns. The game can be played in different difficulty levels: **EASY**, **HARD**, and **CO-OP**.
 
-### Game-Specific Setup
-1. Clone the repository and navigate to the **rhyme_battle** game directory:
-```bash
-cd /path/to/clembench-main/games/rhyme_battle
-```
-2. Install the required dependencies, using:
-```bash
-pip install -r requirements.txt
-```
-3. Run the game with the following command:
-```bash
-python3 scripts/cli.py run -g rhyme_battle -m model_of_your_choice
-```
+## Game Structure
 
-### Game Details
-You can find a more detailed description of the game in the README file located within the [game's folder](https://github.com/zoltancsik/Gruppe-C-PRO2-Projekt/tree/main/clembench-main/games/rhyme_battle).
+### Classes
+
+- **RhymeBattleGameMaster**: The main class responsible for setting up and managing the game logic, including player turns, point distribution, and handling of game events.
+- **RhymeBattleScorer**: This class handles the scoring of the game, calculating the request counts, validated guesses, and success ratios for each game instance.
+- **RhymeBattleGameBenchmark**: Defines the game’s properties and integrates it with the ClemBench Framework.
+- **RhymeBattleInstanceGenerator**: Creates the instances that serve as a base for each game 
+- **PromptGenerator**: Writes prompts into resources/initial_prompts/lvl/prompt_player.template
+
+### Key Features
+
+- **Guesser Class**: Player models, `Player A` and `Player B`, make guesses for rhyming words. Each player's performance is evaluated based on the validity and rhyme quality of their responses.
+- **API-Based Rhyme Validation**: Utilizes the `RhymeValidator` class to check if the guessed word rhymes with the last word in the turn.
+- **Logging and History**: The game logs every event, including player actions, game state, and evaluations. Histories of each player can be stored in JSON format for further inspection.
+- **Points and Game Metrics**: Players earn points based on the difficulty of the game and the accuracy of their rhymes.
+
+## Game Difficulties
+
+1. **EASY**: Players are required to guess simple rhyming words, first one to reach points_needed wins.
+2. **HARD**: Players must guess rhymes at the end of sentences, with stricter validation rules.
+3. **CO-OP**: Players work together to reach a common goal, sharing points but following similar rules to the HARD mode.
+
+## Dependencies
+
+- Python 3.x
+- `clemgame` module for game integration
+- JSON for saving and reading player histories
+- Regular expressions (`re`) for parsing player input
+- `requests` and `pronouncing` Libraries
