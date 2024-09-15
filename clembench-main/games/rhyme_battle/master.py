@@ -25,6 +25,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         # Attributes for Evaluation
         self.aborted: bool = False
         self.lose: bool = False
+        self.win: bool = False
         self.complete_turns: int = 0
         self.words_list = []
         self.history_list = []
@@ -82,15 +83,15 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             if self.difficulty == "CO-OP":
                 if self.player_a.get_points() + \
                    self.player_b.get_points() >= self.points_needed:
-                    print("Game finished")
+                    self.win = True
                     break
             else:
                 if self.player_a.points >= self.points_needed or \
                    self.player_b.points >= self.points_needed:
-                    print("Player A Won")
+                    self.win = True
                     break
                 elif self.current_turn >= self.n_turns:
-                    print("Maximum Turn Count reached")
+                    self.lose = True
                     break
 
         self.log_key("request_counts", self.request_counts)
@@ -415,3 +416,22 @@ class RhymeBattleScorer(GameScorer):
         self.log_episode_score(ms.METRIC_REQUEST_COUNT, total_request_count)
         self.log_episode_score(ms.METRIC_REQUEST_COUNT_PARSED, total_parsed_request_count)
         self.log_episode_score(ms.METRIC_REQUEST_COUNT_VIOLATED, total_violated_request_count)
+
+        request_success_ratio = round(total_parsed_request_count / float(total_request_count), 4)
+        self.log_episode_score(ms.METRIC_REQUEST_SUCCESS, request_success_ratio)
+
+        if episode_interactions.get('aborted', False):
+            self.log_episode_score(ms.METRIC_ABORTED, 1)
+            self.log_episode_score(ms.METRIC_LOSE, 0)
+            self.log_episode_score(ms.METRIC_SUCCESS, 0)
+            self.log_episode_score(ms.BENCH_SCORE, 0)
+        elif episode_interactions.get('win', True):
+            self.log_episode_score(ms.METRIC_SUCCESS, 1)
+            self.log_episode_score(ms.METRIC_ABORTED, 0)
+            self.log_episode_score(ms.METRIC_LOSE, 0)
+            self.log_episode_score(ms.BENCH_SCORE, 100)
+        elif episode_interactions.get('lose', True):
+            self.log_episode_score(ms.METRIC_SUCCESS, 0)
+            self.log_episode_score(ms.METRIC_ABORTED, 0)
+            self.log_episode_score(ms.METRIC_LOSE, 1)
+            self.log_episode_score(ms.BENCH_SCORE, 0)
