@@ -114,7 +114,8 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
     def _get_answer(self, player):
         if player.name == self.player_a.name:
-            prompt, raw_answer, answer = self.player_a(self.player_a.history, self.n_turns)
+            prompt, raw_answer, answer = self.player_a(
+                self.player_a.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
 
             self.log_event(from_='Player A', to='GM', action=action,
@@ -129,7 +130,8 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             print(f"A - {self.player_a.model}: {answer}")
 
         else:
-            prompt, raw_answer, answer = self.player_b(self.player_b.history, self.n_turns)
+            prompt, raw_answer, answer = self.player_b(
+                self.player_b.history, self.n_turns)
             action = {'type': 'get message', 'content': answer}
             self.log_event(from_='Player B', to='GM', action=action,
                            call=(copy.deepcopy(prompt), raw_answer))
@@ -146,8 +148,9 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 'points_so_far': player_obj.points
             })
 
-        with open(f'history_{player_obj.name}.json', 'w', encoding='utf-8') as fle:
-            json.dump(player_obj.history, fle, indent=4, ensure_ascii=False)
+        with open(f'history_{player_obj.name}.json', 'w', encoding='utf-8') \
+             as file:
+            json.dump(player_obj.history, file, indent=4, ensure_ascii=False)
 
     def _parse_answer(self, answer, player):
         if self.difficulty == "EASY":
@@ -155,9 +158,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             if match:
                 word = match.group(1)
                 if self._validate_answer(word, player):
-                    # Send Player's guess to player's history as assistant
                     self._update_history(answer, player, 'assistant')
-                    # Send Player's guess to other players' history as user
                     self._update_history(
                         answer,
                         self.player_b if player.name == "Player A"
@@ -189,18 +190,32 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         rhyme_validator = RhymeValidator(word, self.last_word)
         r_score = rhyme_validator.make_final_judgement()
         if r_score == 0:
-            self._update_history(f"Guess invalid, continue with {self.last_word}", player, 'assistant')
-            self._update_history(f"Guess invalid, continue with {self.last_word}", self.player_b if player.name == "Player A" else self.player_a, 'user')
+            self._update_history
+            (
+                f"Guess invalid, continue with {self.last_word}",
+                player,
+                'assistant'
+            )
+            self._update_history
+            (
+                f"Guess invalid, continue with {self.last_word}",
+                self.player_b if player.name == "Player A" else self.player_a,
+                'user'
+            )
             player.distribute_points(-0.5)
             return False
         else:
             final_points = 2 if r_score == 1 else 1 if r_score == 2 else 0.5
-            print(f"Final Points: {final_points} | Rscore: {r_score}")
             player.distribute_points(final_points)
 
         self.last_word = word
         self._update_history(answer, player, 'assistant')
-        self._update_history(answer, self.player_b if player.name == "Player A" else self.player_a, 'user')
+        self._update_history
+        (
+            answer,
+            self.player_b if player.name == "Player A" else self.player_a,
+            'user'
+        )
         return True
 
     def _validate_answer(self, word, player):
@@ -217,12 +232,35 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 if self.trick_attempt == 1:
                     self.trick_attempt = 0
                     player.distribute_points(1)
-                    self._update_history(f"You were caught cheating, the game goes on with {self.last_word}", self.player_a, "system")
-                    self._update_history("You caught the other player cheating", player, "system")
+                    self._update_history
+                    (
+                        "You were caught cheating, "
+                        f"the game goes on with {self.last_word}",
+                        self.player_a, "system"
+                    )
+                    self._update_history
+                    (
+                        "You caught the other player cheating",
+                        player,
+                        "system"
+                    )
                     return True
                 else:
-                    self._update_history(f"You called the other player out for cheating, but he was not. Game continues with {self.last_word}", player, "system")
-                    self._update_history(f"Last turn, the other palyer falsely accused you of cheating, game continues with {self.last_word}", self.player_a, "system")
+                    self._update_history
+                    (
+                        "You called the other player out for cheating,"
+                        "but they were not. Game continues with "
+                        f"{self.last_word}",
+                        player,
+                        "system"
+                    )
+                    self._update_history
+                    (
+                        "Last turn, the other palyer falsely accused you "
+                        f"of cheating, game continues with {self.last_word}",
+                        self.player_a,
+                        "system"
+                    )
                     player.distribute_points(-0.5)
                     return False
 
@@ -234,10 +272,19 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 player.distribute_points(final_points)
             else:
                 player.distribute_points(-0.5)
-                self._update_history(f"My guess {word} does not rhyme with {self.last_word}", player, 'assistant')
-                self._update_history(f"My guess {word} does not rhyme with {self.last_word}",
-                                     self.player_b if player.name == "Player A"
-                                     else self.player_a, 'user')
+                self._update_history
+                (
+                    f"My guess {word} does not rhyme with {self.last_word}",
+                    player,
+                    'assistant'
+                )
+                self._update_history
+                (
+                    f"My guess {word} does not rhyme with {self.last_word}",
+                    self.player_b if player.name == "Player A"
+                    else self.player_a,
+                    'user'
+                )
                 return False
         else:
             player.distribute_points(-0.5)
@@ -268,7 +315,10 @@ class RhymeBattleGameBenchmark(GameBenchmark):
 
     def get_description(self):
         # This shows up when scripts/cli.py ls
-        return ("Players must continously come up with rhyming words.")
+        return (
+            "Players must continously come up with rhyming words "
+            "or sentences or word chains, based on game difficulty"
+            )
 
     def create_game_master(self,
                            experiment: Dict,
