@@ -28,6 +28,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.words_list = []
         self.history_list = []
         self.rhyme_validator = None
+        self.scorer = None
 
     def setup(self, init_prompt_a, init_prompt_b,
               n_turns, difficulty, game_id, starting_word,
@@ -52,6 +53,9 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.request_counts = [0] * (n_turns + 1)
         self.parsed_request_counts = [0] * (n_turns + 1)
         self.violated_request_counts = [0] * (n_turns + 1)
+
+        # Scoring
+        self.scorer = RhymeBattleScorer(self.experiment, self.__dict__)
 
         # Logging
         self.log_players({
@@ -88,6 +92,8 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                     print("Maximum Turn Count reached")
                     break
 
+        if self.scorer:
+            self.scorer.compute_scores(self.__dict__)
         print("====================[GAME OVER]====================")
         print(f"POINTS: A:{self.player_a.points} B: "
               f"{self.player_b.points}/{self.points_needed} "
@@ -363,6 +369,9 @@ class RhymeBattleGameBenchmark(GameBenchmark):
         return RhymeBattleGameMaster(experiment, players)
 
 
-class RhymeBattleGameScorer(GameScorer):
-    def __init__():
+class RhymeBattleScorer(GameScorer):
+    def __init__(self, experiment: Dict, game_instance: Dict):
+        super().__init__(GAME_NAME, experiment, game_instance)
+
+    def place_holder(self):
         pass
