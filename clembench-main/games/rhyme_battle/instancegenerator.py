@@ -146,25 +146,25 @@ if __name__ == '__main__':
     )
 
     prompt_hard_a = (
-        "Your task is to come up with a sentence that's last word rhymes with $t_word "
-        "Rhyming rules: Two words rhyme if they share the same vowel in the last stressed syllable and all following sounds. "
-        "Try to Provide a perfect rhyming word (exact match after the stressed vowel) or a near rhyming word (minor variations allowed)."
-        "Use phonetic transcriptions similar to those in linguistic dictionaries like CMUdict."
+        "Your task is to come up with a sentence that rhymes with $t_word. "
+        "Review your previous turns and the points you've received for the last words in your sentences. "
+        "Look for patterns in the phonetic properties to improve your guesses."
+        "If you recieve 0.5 points, that means your guess is barely acceptable and you need to rhyme better. "
         "Your have to reach $max_p points before the other player. "
         "Your answer can only consist of your sentence "
         "Your answer can not contain special characters."
-        "Try not to use words at the end of your sentence that have been used before"
+        "Do not use words at the end of your sentence that have been used before"
     )
 
     prompt_hard_b = (
-        "Your task is to come up with a sentence that rhymes with the last word the other player said "
-        "Rhyming rules: Two words rhyme if they share the same vowel in the last stressed syllable and all following sounds. "
-        "Try to Provide a perfect rhyming word (exact match after the stressed vowel) or a near rhyming word (minor variations allowed)."
-        "Use phonetic transcriptions similar to those in linguistic dictionaries like CMUdict."
+        "Your task is to come up with a sentence that rhymes with the last word in other player's sentence "
+        "Review your previous turns and the points you've received for the last words in your sentences. "
+        "Look for patterns in the phonetic properties to improve your guesses."
+        "If you recieve 0.5 points, that means your guess is barely acceptable and you need to rhyme better. "
         "Your have to reach $max_p points before the other player. "
         "Your answer can only consist of your sentence "
         "Your answer can not contain special characters."
-        "Try not to use words at the end of your sentence that have been used before"
+        "Do not use words at the end of your sentence that have been used before"
     )
 
     prompt_generator = PromptGenerator()
