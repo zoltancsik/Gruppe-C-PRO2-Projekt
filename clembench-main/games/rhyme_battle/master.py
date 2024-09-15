@@ -74,13 +74,19 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
     def play(self) -> None:
         while self.turn():
-            if self.player_a.points >= self.points_needed or \
-               self.player_b.points >= self.points_needed:
-                print("Player A Won")
-                break
-            elif self.current_turn >= self.n_turns:
-                print("Maximum Turn Count reached")
-                break
+            if self.difficulty == "CO-OP":
+                if self.player_a.get_points() + \
+                   self.player_b.get_points() >= self.points_needed:
+                    print("Game finished")
+                    break
+            else:
+                if self.player_a.points >= self.points_needed or \
+                   self.player_b.points >= self.points_needed:
+                    print("Player A Won")
+                    break
+                elif self.current_turn >= self.n_turns:
+                    print("Maximum Turn Count reached")
+                    break
 
         print("====================[GAME OVER]====================")
         print(f"POINTS: A:{self.player_a.points} B: "
@@ -107,7 +113,6 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
 
-        print("\n")
         self.current_turn += 1
         self.log_next_turn()
         return True
@@ -185,6 +190,37 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             else:
                 # MOVE_RULE violated
                 return False
+
+        elif self.difficulty == "CO-OP":
+            if isinstance(answer, str):
+                self._validate_coop_answer(answer, player)
+                return True
+            else:
+                # MOVE_RULE violated
+                return False
+
+    def _validate_coop_answer(self, answer, player):
+        rhyme_validator = RhymeValidator(answer, self.starting_word)
+        r_score = rhyme_validator.make_final_judgement()
+        reason = ""
+        if r_score == 0:
+            reason = (f"Guess invalid, {answer}"
+                      f"does not rhyme with {self.starting_word}")
+            return False
+        elif answer in self.words_list:
+            print("GAME_RULE: word already used")
+            reason = f"Guess invalid, {answer} was already used"
+            return False
+        else:
+            reason = answer
+            final_points = 2 if r_score == 1 else 1 if r_score == 2 else 0.5
+            player.distribute_points(final_points)
+
+        self.words_list.append(answer)
+        self._update_history(reason, player, 'assistant')
+        self._update_history(reason, self.player_b if player.name == "Player A"
+                             else self.player_a, 'user')
+        return True
 
     def _validate_hard_answer(self, answer, word, player):
         rhyme_validator = RhymeValidator(word, self.last_word)

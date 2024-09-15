@@ -167,11 +167,24 @@ if __name__ == '__main__':
         "Do not use words at the end of your sentence that have been used before"
     )
 
+    prompt_co_op = (
+        "Your task is to build a word chain where each word rhymes with $t_word. "
+        "Review your previous turns and the points you've received for the last words in your sentences. "
+        "Look for patterns in the phonetic properties to improve your guesses."
+        "If you recieve 0.5 points, that means your guess is barely acceptable and you need to rhyme better. "
+        "Your have to reach $max_p points together with your partner. "
+        "Your answer can only consist of the word you'd like to add to the chain "
+        "Your answer can not contain special characters."
+        "Do not use words that have been used before"
+    )
+
     prompt_generator = PromptGenerator()
     prompt_generator.generate_prompt("EASY", prompt_easy_a, 'a')
     prompt_generator.generate_prompt("EASY", prompt_easy_b, 'b')
     prompt_generator.generate_prompt("HARD", prompt_hard_a, 'a')
     prompt_generator.generate_prompt("HARD", prompt_hard_b, 'b')
+    prompt_generator.generate_prompt("CO-OP", prompt_co_op, 'a')
+    prompt_generator.generate_prompt("CO-OP", prompt_co_op, 'b')
     prompt_generator.generator_infos()
     created_episodes = RhymeBattleInstanceGenerator()
     created_episodes.generate()
