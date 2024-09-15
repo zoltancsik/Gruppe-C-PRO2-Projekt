@@ -2,6 +2,7 @@ import re
 import copy
 import json
 from typing import List, Dict
+from clemgame import metrics as ms
 from clemgame.clemgame import (DialogueGameMaster,
                                GameBenchmark,
                                GameScorer,
@@ -24,10 +25,12 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         # Attributes for Evaluation
         self.aborted: bool = False
         self.lose: bool = False
+        self.win: bool = False
         self.complete_turns: int = 0
         self.words_list = []
         self.history_list = []
         self.rhyme_validator = None
+        self.scorer = None
 
     def setup(self, init_prompt_a, init_prompt_b,
               n_turns, difficulty, game_id, starting_word,
@@ -53,6 +56,9 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.parsed_request_counts = [0] * (n_turns + 1)
         self.violated_request_counts = [0] * (n_turns + 1)
 
+        # Scoring
+        self.scorer = RhymeBattleScorer(self.experiment, self.__dict__)
+
         # Logging
         self.log_players({
             'GM': 'SoundAlike GM',
@@ -77,16 +83,30 @@ class RhymeBattleGameMaster(DialogueGameMaster):
             if self.difficulty == "CO-OP":
                 if self.player_a.get_points() + \
                    self.player_b.get_points() >= self.points_needed:
-                    print("Game finished")
+                    self.win = True
                     break
             else:
                 if self.player_a.points >= self.points_needed or \
                    self.player_b.points >= self.points_needed:
-                    print("Player A Won")
+                    self.win = True
                     break
                 elif self.current_turn >= self.n_turns:
-                    print("Maximum Turn Count reached")
+                    self.lose = True
                     break
+
+        self.log_key("request_counts", self.request_counts)
+        self.log_key("parsed_request_counts", self.parsed_request_counts)
+        self.log_key("violated_request_counts", self.violated_request_counts)
+
+        episode_interactions = {
+            "turns": self.current_turn,
+            "request_counts": self.request_counts,
+            "parsed_request_counts": self.parsed_request_counts,
+            "violated_request_counts": self.violated_request_counts
+        }
+
+        if self.scorer:
+            self.scorer.compute_scores(episode_interactions)
 
         print("====================[GAME OVER]====================")
         print(f"POINTS: A:{self.player_a.points} B: "
@@ -98,18 +118,24 @@ class RhymeBattleGameMaster(DialogueGameMaster):
 
     def turn(self):
         # PLAYER A
+        self.request_counts[self.current_turn] += 1
         answer_a = self._get_answer(self.player_a)
         if not self._parse_answer(answer_a, self.player_a):
+            self.violated_request_counts[self.current_turn] += 1
             pass
         else:
+            self.parsed_request_counts[self.current_turn] += 1
             action = {'type': 'send message', 'content': answer_a}
             self.log_event(from_='GM', to='Player 2', action=action)
 
         # PLAYER B
+        self.request_counts[self.current_turn] += 1
         answer_b = self._get_answer(self.player_b)
         if not self._parse_answer(answer_b, self.player_b):
+            self.violated_request_counts[self.current_turn] += 1
             pass
         else:
+            self.parsed_request_counts[self.current_turn] += 1
             action = {'type': 'send message', 'content': answer_b}
             self.log_event(from_='GM', to='Player 1', action=action)
 
@@ -170,11 +196,10 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                         else self.player_a, 'user')
                     return True
                 else:
-                    # GAME RULE violated
+                    # MOVE_RULE violated
                     return False
             else:
-                # MOVE_RULE violated
-                print("MOVE_RULE Violated")
+                # GAME_RULE violated
                 return False
 
         elif self.difficulty == "HARD":
@@ -185,10 +210,8 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 if self._validate_hard_answer(answer, word.group(), player):
                     return True
                 else:
-                    # GAME_RULE violated
                     return False
             else:
-                # MOVE_RULE violated
                 return False
 
         elif self.difficulty == "CO-OP":
@@ -268,30 +291,26 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 if self.trick_attempt == 1:
                     self.trick_attempt = 0
                     player.distribute_points(1)
-                    self._update_history
-                    (
+                    self._update_history(
                         "You were caught cheating, "
                         f"the game goes on with {self.last_word}",
                         self.player_a, "system"
                     )
-                    self._update_history
-                    (
+                    self._update_history(
                         "You caught the other player cheating",
                         player,
                         "system"
                     )
                     return True
                 else:
-                    self._update_history
-                    (
+                    self._update_history(
                         "You called the other player out for cheating,"
                         "but they were not. Game continues with "
                         f"{self.last_word}",
                         player,
                         "system"
                     )
-                    self._update_history
-                    (
+                    self._update_history(
                         "Last turn, the other palyer falsely accused you "
                         f"of cheating, game continues with {self.last_word}",
                         self.player_a,
@@ -308,14 +327,12 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                 player.distribute_points(final_points)
             else:
                 player.distribute_points(-0.5)
-                self._update_history
-                (
+                self._update_history(
                     f"My guess {word} does not rhyme with {self.last_word}",
                     player,
                     'assistant'
                 )
-                self._update_history
-                (
+                self._update_history(
                     f"My guess {word} does not rhyme with {self.last_word}",
                     self.player_b if player.name == "Player A"
                     else self.player_a,
@@ -362,7 +379,59 @@ class RhymeBattleGameBenchmark(GameBenchmark):
                            ) -> GameMaster:
         return RhymeBattleGameMaster(experiment, players)
 
+    def create_game_scorer(self,
+                           experiment: Dict,
+                           game_instance: Dict) -> GameScorer:
+        return RhymeBattleScorer(experiment, game_instance)
 
-class RhymeBattleGameScorer(GameScorer):
-    def __init__():
-        pass
+
+class RhymeBattleScorer(GameScorer):
+    def __init__(self, experiment: Dict, game_instance: Dict):
+        super().__init__(GAME_NAME, experiment, game_instance)
+
+    def compute_scores(self, episode_interactions: Dict) -> None:
+        all_turn_scores = []
+        request_counts = episode_interactions["request_counts"]
+        parsed_request_counts = episode_interactions["parsed_request_counts"]
+        violated_request_counts = episode_interactions["violated_request_counts"]
+
+        for turn_idx in range(len(request_counts)):
+            turn_score_dict = {
+                "request_counts": request_counts[turn_idx],
+                "parsed_request_counts": parsed_request_counts[turn_idx],
+                "violated_request_counts": violated_request_counts[turn_idx]
+            }
+
+            self.log_turn_score(turn_idx, ms.METRIC_REQUEST_COUNT, turn_score_dict["request_counts"])
+            self.log_turn_score(turn_idx, ms.METRIC_REQUEST_COUNT_PARSED, turn_score_dict["parsed_request_counts"])
+            self.log_turn_score(turn_idx, ms.METRIC_REQUEST_COUNT_VIOLATED, turn_score_dict["violated_request_counts"])
+            all_turn_scores.append(turn_score_dict)
+
+        total_request_count = sum(
+            [turn["request_counts"] for turn in all_turn_scores])
+        total_parsed_request_count = sum(
+            [turn["parsed_request_counts"] for turn in all_turn_scores])
+        total_violated_request_count = sum([turn["violated_request_counts"] for turn in all_turn_scores])
+
+        self.log_episode_score(ms.METRIC_REQUEST_COUNT, total_request_count)
+        self.log_episode_score(ms.METRIC_REQUEST_COUNT_PARSED, total_parsed_request_count)
+        self.log_episode_score(ms.METRIC_REQUEST_COUNT_VIOLATED, total_violated_request_count)
+
+        request_success_ratio = round(total_parsed_request_count / float(total_request_count), 4)
+        self.log_episode_score(ms.METRIC_REQUEST_SUCCESS, request_success_ratio)
+
+        if episode_interactions.get('aborted', False):
+            self.log_episode_score(ms.METRIC_ABORTED, 1)
+            self.log_episode_score(ms.METRIC_LOSE, 0)
+            self.log_episode_score(ms.METRIC_SUCCESS, 0)
+            self.log_episode_score(ms.BENCH_SCORE, 0)
+        elif episode_interactions.get('win', True):
+            self.log_episode_score(ms.METRIC_SUCCESS, 1)
+            self.log_episode_score(ms.METRIC_ABORTED, 0)
+            self.log_episode_score(ms.METRIC_LOSE, 0)
+            self.log_episode_score(ms.BENCH_SCORE, 100)
+        elif episode_interactions.get('lose', True):
+            self.log_episode_score(ms.METRIC_SUCCESS, 0)
+            self.log_episode_score(ms.METRIC_ABORTED, 0)
+            self.log_episode_score(ms.METRIC_LOSE, 1)
+            self.log_episode_score(ms.BENCH_SCORE, 0)
