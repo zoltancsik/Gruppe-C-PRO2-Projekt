@@ -73,9 +73,11 @@ class RhymeBattleGameMaster(DialogueGameMaster):
                           f"Game setup: difficulty={self.difficulty}, "
                           f"Points needed={self.points_needed}, "
                           f"Turns={self.n_turns}"})
+
         self.log_players({'GM': 'RhymeBattle GameMaster',
                           'Player A': f'{self.model_a}',
                           'Player B': f'{self.model_b}'})
+
         action = {'type': 'send message', 'content': init_prompt_a}
         self.log_event(from_='GM', to='Player 1', action=action)
         action = {'type': 'send message', 'content': init_prompt_b}
@@ -132,6 +134,7 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         self.log_key("request_counts", self.request_counts)
         self.log_key("parsed_request_counts", self.parsed_request_counts)
         self.log_key("violated_request_counts", self.violated_request_counts)
+
         # LOG GAME ENDING
         self.log_event(from_='GM',
                        to='GM',
@@ -154,18 +157,22 @@ class RhymeBattleGameMaster(DialogueGameMaster):
         if self.scorer:
             self.scorer.compute_scores(episode_interactions)
 
-        print("====================[GAME OVER]====================") # FIXME: REMOVE
+        # FIXME: REMOVE
+        print("====================[GAME OVER]====================")
         print(f"POINTS: A:{self.player_a.points} B: "
               f"{self.player_b.points}/{self.points_needed} "
               f"ROUNDS: {self.current_turn}/{self.n_turns}")
-        action = {'type': 'info', 'content': 'end game'}
-        self.log_event(from_='GM', to='GM', action=action)
+
+        self.log_event(from_='GM',
+                       to='GM',
+                       action={'type': 'info', 'content': 'end game'})
         self.log_eval_assets()
 
     def turn(self):
         # PLAYER A
         answer_a = self._get_answer(self.player_a)
         self.request_counts[self.current_turn] += 1
+
         if not self._parse_answer(answer_a, self.player_a):
             # MOVE_RULE OR GAME_RULE VIOLATED
             self.violated_request_counts[self.current_turn] += 1
@@ -513,11 +520,16 @@ class RhymeBattleScorer(GameScorer):
         super().__init__(GAME_NAME, experiment, game_instance)
 
     def compute_scores(self, episode_interactions: Dict) -> None:
+        # COLLECT ALL SCORES OF AN INSTANCE
         all_turn_scores = []
-        request_counts = episode_interactions["request_counts"]
-        parsed_request_counts = episode_interactions["parsed_request_counts"]
-        violated_request_counts = episode_interactions["violated_request_counts"]
+        request_counts = episode_interactions[
+            "request_counts"]
+        parsed_request_counts = episode_interactions[
+            "parsed_request_counts"]
+        violated_request_counts = episode_interactions[
+            "violated_request_counts"]
 
+        # GET TURN SPECIFIC METRICS
         for turn_idx in range(len(request_counts)):
             turn_score_dict = {
                 "request_counts": request_counts[turn_idx],
@@ -525,24 +537,40 @@ class RhymeBattleScorer(GameScorer):
                 "violated_request_counts": violated_request_counts[turn_idx]
             }
 
-            self.log_turn_score(turn_idx, ms.METRIC_REQUEST_COUNT, turn_score_dict["request_counts"])
-            self.log_turn_score(turn_idx, ms.METRIC_REQUEST_COUNT_PARSED, turn_score_dict["parsed_request_counts"])
-            self.log_turn_score(turn_idx, ms.METRIC_REQUEST_COUNT_VIOLATED, turn_score_dict["violated_request_counts"])
+            self.log_turn_score(turn_idx,
+                                ms.METRIC_REQUEST_COUNT,
+                                turn_score_dict["request_counts"])
+            self.log_turn_score(turn_idx,
+                                ms.METRIC_REQUEST_COUNT_PARSED,
+                                turn_score_dict["parsed_request_counts"])
+            self.log_turn_score(turn_idx,
+                                ms.METRIC_REQUEST_COUNT_VIOLATED,
+                                turn_score_dict["violated_request_counts"])
             all_turn_scores.append(turn_score_dict)
 
-        total_request_count = sum(
-            [turn["request_counts"] for turn in all_turn_scores])
-        total_parsed_request_count = sum(
-            [turn["parsed_request_counts"] for turn in all_turn_scores])
-        total_violated_request_count = sum([turn["violated_request_counts"] for turn in all_turn_scores])
+        # SUM METRICS
+        total_request_count = sum([turn["request_counts"]
+                                   for turn in all_turn_scores])
+        total_parsed_request_count = sum([turn["parsed_request_counts"]
+                                          for turn in all_turn_scores])
+        total_violated_request_count = sum([turn["violated_request_counts"]
+                                            for turn in all_turn_scores])
 
-        self.log_episode_score(ms.METRIC_REQUEST_COUNT, total_request_count)
-        self.log_episode_score(ms.METRIC_REQUEST_COUNT_PARSED, total_parsed_request_count)
-        self.log_episode_score(ms.METRIC_REQUEST_COUNT_VIOLATED, total_violated_request_count)
+        # LOG SUMMED METRICS
+        self.log_episode_score(ms.METRIC_REQUEST_COUNT,
+                               total_request_count)
+        self.log_episode_score(ms.METRIC_REQUEST_COUNT_PARSED,
+                               total_parsed_request_count)
+        self.log_episode_score(ms.METRIC_REQUEST_COUNT_VIOLATED,
+                               total_violated_request_count)
 
-        request_success_ratio = round(total_parsed_request_count / float(total_request_count), 4)
-        self.log_episode_score(ms.METRIC_REQUEST_SUCCESS, request_success_ratio)
+        # LOG SUCCESS RATIO
+        request_success_ratio = round(total_parsed_request_count /
+                                      float(total_request_count), 4)
+        self.log_episode_score(ms.METRIC_REQUEST_SUCCESS,
+                               request_success_ratio)
 
+        # LOG INGAME METRICS
         if episode_interactions.get('aborted', False):
             self.log_episode_score(ms.METRIC_ABORTED, 1)
             self.log_episode_score(ms.METRIC_LOSE, 0)
